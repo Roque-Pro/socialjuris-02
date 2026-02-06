@@ -14,9 +14,24 @@ const app = express();
 const PORT = process.env.STRIPE_API_PORT || 3001;
 
 // Enable CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://socialjuris-02.vercel.app',
+  'https://socialjuris-02.onrender.com'
+];
+
 app.use(cors({
-  origin: '*',
-  credentials: false
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Middleware para webhook (raw body para verificação de signature)
