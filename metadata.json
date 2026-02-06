@@ -1,0 +1,8 @@
+{
+  "name": "SocialJuris4.1",
+  "description": "A premium legal marketplace connecting clients with verified lawyers, featuring real-time case management, AI-assisted intake, and simulated video consultations.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
