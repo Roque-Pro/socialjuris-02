@@ -7,7 +7,8 @@ export interface CheckoutResponse {
   error?: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Força o uso do Render em vez do localhost
+const API_BASE_URL = 'https://socialjuris-02.onrender.com';
 
 export async function createJurisCheckoutSession(
   userId: string,
