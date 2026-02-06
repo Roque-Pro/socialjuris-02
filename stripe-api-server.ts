@@ -15,8 +15,8 @@ const PORT = process.env.STRIPE_API_PORT || 3001;
 
 // Enable CORS
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', process.env.FRONTEND_URL],
-  credentials: true
+  origin: '*',
+  credentials: false
 }));
 
 // Middleware para webhook (raw body para verificação de signature)
