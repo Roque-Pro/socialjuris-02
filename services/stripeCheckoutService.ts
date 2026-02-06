@@ -8,7 +8,7 @@ export interface CheckoutResponse {
 }
 
 // Força o uso do Render em vez do localhost
-const API_BASE_URL = 'https://socialjuris-02.onrender.com';
+const API_BASE_URL = 'https://socialjuris-api-backend.onrender.com';
 
 export async function createJurisCheckoutSession(
   userId: string,
