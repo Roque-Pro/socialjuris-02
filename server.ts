@@ -8,7 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 const app = express();
 const port = process.env.PORT || 3001;
 
-// CONFIGURAÇÃO DO CORS - Isso libera o acesso da Vercel
+// CONFIGURAÇÃO DO CORS - ESSENCIAL PARA A VERCEL CONVERSAR COM O RENDER
 app.use(cors({
   origin: 'https://socialjuris-02.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -18,15 +18,15 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- ROTAS DA API (O que o seu frontend chama) ---
+// --- ROTAS DA API (O QUE O SEU FRONTEND CHAMA) ---
 
 app.post('/api/create-juris-checkout', async (req, res) => {
   try {
     const { userId, priceId, successUrl, cancelUrl } = req.body;
     const result = await createJurisCheckoutSession(userId, priceId, successUrl, cancelUrl);
     res.json(result);
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Erro interno no servidor' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -35,17 +35,16 @@ app.post('/api/create-subscription-checkout', async (req, res) => {
     const { userId, priceId, successUrl, cancelUrl } = req.body;
     const result = await createSubscriptionCheckoutSession(userId, priceId, successUrl, cancelUrl);
     res.json(result);
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Erro interno no servidor' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Rota de teste para você ver se o backend está vivo
 app.get('/health', (req, res) => {
   res.send('Backend SocialJuris está rodando liso! 🚀');
 });
 
-// --- SUAS FUNÇÕES ORIGINAIS (AJUSTADAS) ---
+// --- VARIÁVEIS E INICIALIZAÇÕES ---
 
 const GOOGLE_PUBLIC_KEYS_URL = 'https://www.googleapis.com/oauth2/v1/certs';
 
@@ -75,26 +74,48 @@ function getPriceToJurisMap(): Record<string, number> {
   };
 }
 
-// Funções de validação de Token (Mantidas como estavam)
+// --- FUNÇÕES DE AUTENTICAÇÃO (GOOGLE E FACEBOOK) ---
+
 export async function validateGoogleToken(token: string, expectedClientId: string) {
-    try {
-      const decoded = jwtDecode<any>(token);
-      if (!decoded || !decoded.email) throw new Error('Token inválido');
-      if (decoded.aud !== expectedClientId) throw new Error('Token não autorizado');
-      if (decoded.exp * 1000 < Date.now()) throw new Error('Token expirado');
-      return { valid: true, user: { email: decoded.email, name: decoded.name, picture: decoded.picture, googleId: decoded.sub } };
-    } catch (error: any) {
-      return { valid: false, error: error.message };
+  try {
+    const decoded = jwtDecode<any>(token);
+    if (!decoded || !decoded.email) throw new Error('Token inválido: email não encontrado');
+    if (decoded.iss !== 'https://accounts.google.com' && decoded.iss !== 'accounts.google.com') {
+      throw new Error('Token não foi emitido pelo Google');
     }
+    if (decoded.aud !== expectedClientId) throw new Error('Token não autorizado');
+    if (decoded.exp * 1000 < Date.now()) throw new Error('Token expirado');
+    return { valid: true, user: { email: decoded.email, name: decoded.name, picture: decoded.picture, verified: decoded.email_verified, googleId: decoded.sub } };
+  } catch (error: any) {
+    return { valid: false, error: error.message };
+  }
 }
 
-// ... (Aqui você pode manter as funções validateFacebookToken, etc.)
+export async function validateFacebookToken(accessToken: string, userID: string, appId: string) {
+  try {
+    const debugUrl = `https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${appId}`;
+    const debugResponse = await fetch(debugUrl);
+    const debugData = await debugResponse.json();
 
-// FUNÇÕES DO STRIPE (Exportadas e Prontas para uso)
+    if (!debugData.data || !debugData.data.is_valid) throw new Error('Token Facebook inválido');
+    if (debugData.data.app_id !== appId) throw new Error('App ID não corresponde');
+
+    const userUrl = `https://graph.facebook.com/me?fields=id,name,email,picture.width(200).height(200)&access_token=${accessToken}`;
+    const userResponse = await fetch(userUrl);
+    const userData = await userResponse.json();
+
+    return { valid: true, user: { id: userData.id, email: userData.email, name: userData.name || 'Usuário Facebook', picture: userData.picture?.data?.url || '' } };
+  } catch (error: any) {
+    return { valid: false, error: error.message };
+  }
+}
+
+// --- FUNÇÕES DO STRIPE ---
+
 export async function createJurisCheckoutSession(userId: string, priceId: string, successUrl: string, cancelUrl: string) {
   try {
     const db = getSupabase();
-    const { data: user } = await db.from('profiles').select('stripe_customer_id, email').eq('id', userId).single();
+    const { data: user } = await db.from('profiles').select('stripe_customer_id').eq('id', userId).single();
     if (!user) throw new Error('Usuário não encontrado');
 
     let customerId = user.stripe_customer_id;
@@ -145,8 +166,10 @@ export async function createSubscriptionCheckoutSession(userId: string, priceId:
   }
 }
 
-// INICIALIZAÇÃO DO SERVIDOR
+// MANTENHA AS OUTRAS FUNÇÕES (handleCheckoutSessionCompleted, etc) AQUI SE PRECISAR DELAS RODANDO VIA WEBHOOK
+
+// --- INICIALIZAÇÃO DO SERVIDOR ---
 app.listen(port, () => {
   console.log(`\n✅ Servidor rodando na porta ${port}`);
-  console.log(`✅ Aceitando requisições de: https://socialjuris-02.vercel.app\n`);
+  console.log(`✅ URL Permitida (CORS): https://socialjuris-02.vercel.app\n`);
 });
