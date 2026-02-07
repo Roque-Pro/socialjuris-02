@@ -6,7 +6,9 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Se as variáveis sumirem, o site não crasha, ele avisa no console
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("⚠️ Atenção: Variáveis do Supabase não carregadas no Frontend.");
+  console.error("❌ ERRO CRÍTICO: Variáveis do Supabase não carregadas.");
+  console.error("VITE_SUPABASE_URL:", supabaseUrl ? "✓ Carregado" : "✗ Faltando");
+  console.error("VITE_SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Carregado" : "✗ Faltando");
 }
 
 export const supabase = createClient(
