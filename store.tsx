@@ -59,29 +59,39 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // 1. Monitorar estado de autenticação
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) fetchUserProfile(session.user.id);
-    });
+    console.log("🔍 AppProvider: Iniciando verificação de sessão Supabase");
+    
+    try {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log("✅ AppProvider: Session carregada:", session?.user?.email || "sem sessão");
+        setSession(session);
+        if (session?.user) fetchUserProfile(session.user.id);
+      }).catch((error) => {
+        console.error("❌ AppProvider: Erro ao carregar sessão:", error);
+      });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setCurrentUser(null);
-        setCases([]);
-        setNotifications([]);
-        setCrmClients([]);
-        setSmartDocs([]);
-        setAgendaItems([]);
-        setSavedCalculations([]);
-      }
-    });
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        console.log("🔄 AppProvider: Estado de autenticação mudou:", _event);
+        setSession(session);
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        } else {
+          setCurrentUser(null);
+          setCases([]);
+          setNotifications([]);
+          setCrmClients([]);
+          setSmartDocs([]);
+          setAgendaItems([]);
+          setSavedCalculations([]);
+        }
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      console.error("❌ AppProvider: Erro geral no useEffect:", error);
+    }
     }, []);
 
   // 2. Buscar dados quando o usuário estiver logado
@@ -141,23 +151,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // --- FUNÇÕES DE BUSCA ---
 
   const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    console.log("🔍 fetchUserProfile: Buscando perfil do usuário:", userId);
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Erro ao buscar perfil:', error);
-    } else if (data) {
-      setCurrentUser({
-        ...data,
-        createdAt: data.created_at,
-        oab: data.oab || undefined,
-        verified: data.verified || false,
-        isPremium: data.is_premium || false,
-        balance: data.balance || 0
-      });
+      if (error) {
+        console.error('❌ Erro ao buscar perfil:', error);
+      } else if (data) {
+        console.log("✅ fetchUserProfile: Perfil carregado com sucesso");
+        setCurrentUser({
+          ...data,
+          createdAt: data.created_at,
+          oab: data.oab || undefined,
+          verified: data.verified || false,
+          isPremium: data.is_premium || false,
+          balance: data.balance || 0
+        });
+      }
+    } catch (error) {
+      console.error("❌ fetchUserProfile: Erro geral:", error);
     }
   };
 
