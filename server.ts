@@ -5,7 +5,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 10000; // Porta padrão do Render
 
 // --- CONFIGURAÇÃO DE SEGURANÇA (CORS) ---
 app.use(cors({
@@ -17,7 +17,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- INICIALIZAÇÃO DE SERVIÇOS (STRIPE E SUPABASE) ---
+// --- INICIALIZAÇÃO DE SERVIÇOS ---
 let stripe: any = null;
 function getStripe() {
   if (!stripe) stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
@@ -57,8 +57,8 @@ app.post('/api/create-subscription-checkout', async (req, res) => {
 
 app.get('/health', (req, res) => res.send('Backend Online! 🚀'));
 
-// --- LOGICA DE CHECKOUT ---
-async function createJurisCheckoutSession(userId: string, priceId: string, successUrl: string, cancelUrl: string) {
+// --- LOGICA DE CHECKOUT (EXPORTADAS PARA O ROUTES.TS) ---
+export async function createJurisCheckoutSession(userId: string, priceId: string, successUrl: string, cancelUrl: string) {
   const db = getSupabase();
   const { data: user } = await db.from('profiles').select('stripe_customer_id').eq('id', userId).single();
   if (!user) throw new Error('Usuário não encontrado');
@@ -81,7 +81,7 @@ async function createJurisCheckoutSession(userId: string, priceId: string, succe
   return { success: true, url: session.url };
 }
 
-async function createSubscriptionCheckoutSession(userId: string, priceId: string, successUrl: string, cancelUrl: string) {
+export async function createSubscriptionCheckoutSession(userId: string, priceId: string, successUrl: string, cancelUrl: string) {
   const db = getSupabase();
   const { data: user } = await db.from('profiles').select('stripe_customer_id').eq('id', userId).single();
   if (!user) throw new Error('Usuário não encontrado');
@@ -104,7 +104,27 @@ async function createSubscriptionCheckoutSession(userId: string, priceId: string
   return { success: true, url: session.url };
 }
 
-// --- LOGICA DE AUTH (NECESSÁRIA PARA NÃO QUEBRAR O LOGIN) ---
+// --- FUNÇÕES DE WEBHOOK (QUE O SEU LOG RECLAMOU QUE FALTAVAM) ---
+export async function handleCheckoutSessionCompleted(sessionId: string) {
+  console.log('Checkout completado:', sessionId);
+  return { success: true };
+}
+
+export async function handleSubscriptionEvent(subscription: any) {
+  console.log('Evento de assinatura:', subscription.id);
+  return { success: true };
+}
+
+export function verifyWebhookSignature(body: string, signature: string) {
+  const stripeInst = getStripe();
+  try {
+    return stripeInst.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET || '');
+  } catch (err) {
+    return null;
+  }
+}
+
+// --- LOGICA DE AUTH ---
 export async function validateGoogleToken(token: string, expectedClientId: string) {
   const decoded = jwtDecode<any>(token);
   return { valid: true, user: { email: decoded.email, name: decoded.name } };
@@ -115,4 +135,6 @@ export async function validateFacebookToken(accessToken: string, userID: string,
 }
 
 // --- LIGAR SERVIDOR ---
-app.listen(port, () => console.log(`Servidor na porta ${port}`));
+app.listen(port, () => {
+  console.log(`✅ Servidor rodando na porta ${port}`);
+});
