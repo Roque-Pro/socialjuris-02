@@ -1,6 +1,12 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const getAI = () => new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.REACT_APP_GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.REACT_APP_GEMINI_API_KEY;
+  console.log('🔑 Gemini API Key carregada:', apiKey ? '✓' : '✗');
+  console.log('VITE_GEMINI_API_KEY:', import.meta.env.VITE_GEMINI_API_KEY ? 'presente' : 'ausente');
+  console.log('REACT_APP_GEMINI_API_KEY:', import.meta.env.REACT_APP_GEMINI_API_KEY ? 'presente' : 'ausente');
+  return new GoogleGenAI({ apiKey });
+};
 
 export const analyzeCaseDescription = async (
     description: string
