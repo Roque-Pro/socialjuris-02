@@ -19,7 +19,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://socialjuris-02.vercel.app',
   'https://socialjuris-02-roque-rafaels-projects.vercel.app',
-  'https://socialjuris-02.onrender.com'
+  'https://socialjuris-02.onrender.com',
+  process.env.FRONTEND_URL || '' // Adicional para flexibilidade
 ];
 
 app.use(cors({
