@@ -13,6 +13,13 @@ interface AppContextType {
   smartDocs: SmartDoc[]; // Estado global de documentos
   agendaItems: AgendaItem[]; // Estado global da agenda
   savedCalculations: SavedCalculation[]; // Estado global de calculos
+  
+  // Click counter
+  clicksUsed: number;
+  clicksLimit: number;
+  clicksResetDate: string;
+  recordClick: () => void;
+  
   login: (email: string, role: UserRole, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (user: Omit<User, 'id' | 'createdAt' | 'avatar'>, password?: string) => Promise<void>;
@@ -56,6 +63,43 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>([]);
   const [session, setSession] = useState<any>(null);
+  
+  // Click counter
+  const [clicksUsed, setClicksUsed] = useState<number>(0);
+  const clicksLimit = 5000;
+  const [clicksResetDate, setClicksResetDate] = useState<string>(localStorage.getItem('clicksResetDate') || new Date().toISOString());
+
+  // Carregar clicks do localStorage ao montar
+  useEffect(() => {
+    if (currentUser) {
+      const savedClicks = localStorage.getItem(`clicks_${currentUser.id}`);
+      const savedResetDate = localStorage.getItem(`clicksResetDate_${currentUser.id}`);
+      
+      if (savedResetDate) {
+        const lastReset = new Date(savedResetDate);
+        const now = new Date();
+        
+        // Se passou 30 dias, reset
+        if ((now.getTime() - lastReset.getTime()) > (30 * 24 * 60 * 60 * 1000)) {
+          setClicksUsed(0);
+          const newResetDate = now.toISOString();
+          localStorage.setItem(`clicksResetDate_${currentUser.id}`, newResetDate);
+          setClicksResetDate(newResetDate);
+        } else {
+          setClicksUsed(savedClicks ? parseInt(savedClicks) : 0);
+          setClicksResetDate(savedResetDate);
+        }
+      }
+    }
+  }, [currentUser?.id]);
+
+  const recordClick = () => {
+    if (currentUser) {
+      const newCount = clicksUsed + 1;
+      setClicksUsed(newCount);
+      localStorage.setItem(`clicks_${currentUser.id}`, newCount.toString());
+    }
+  };
 
   // 1. Monitorar estado de autenticação
   useEffect(() => {
@@ -970,7 +1014,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   return (
-    <AppContext.Provider value={{ currentUser, users, cases, notifications, crmClients, smartDocs, agendaItems, savedCalculations, login, logout, register, updateProfile, createCase, acceptCase, hireLawyer, openChatWithLawyer, sendMessage, toggleLawyerVerification, closeCase, rateOtherUser, markNotificationAsRead, buyJuris, subscribePremium, togglePremiumStatus, fetchCRMClients, addCRMClient, updateCRMClient, fetchSmartDocs, addSmartDoc, fetchAgendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, fetchSavedCalculations, saveCalculation }}>
+    <AppContext.Provider value={{ currentUser, users, cases, notifications, crmClients, smartDocs, agendaItems, savedCalculations, clicksUsed, clicksLimit, clicksResetDate, recordClick, login, logout, register, updateProfile, createCase, acceptCase, hireLawyer, openChatWithLawyer, sendMessage, toggleLawyerVerification, closeCase, rateOtherUser, markNotificationAsRead, buyJuris, subscribePremium, togglePremiumStatus, fetchCRMClients, addCRMClient, updateCRMClient, fetchSmartDocs, addSmartDoc, fetchAgendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, fetchSavedCalculations, saveCalculation }}>
       {children}
     </AppContext.Provider>
   );

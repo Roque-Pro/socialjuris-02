@@ -5,6 +5,8 @@ import {
   BarChart3, Lock, Clock, DollarSign, User, CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../store';
+import { useClickLimit } from '../hooks/useClickLimit';
+import ClickLimitModal from './ClickLimitModal';
 import { SmartDoc } from '../types';
 import { 
   analyzeDocumentAI, chatWithDocument, compareDocuments, 
@@ -23,6 +25,7 @@ interface DocumentAnalysis {
 
 const SmartDocs: React.FC = () => {
   const { smartDocs, addSmartDoc, crmClients } = useApp();
+  const { handleClick, showLimitModal, setShowLimitModal, clicksUsed, clicksLimit } = useClickLimit();
   const [uploading, setUploading] = useState(false);
   const [selectedClient, setSelectedClient] = useState('');
   const [selectedDoc, setSelectedDoc] = useState<SmartDoc | null>(null);
@@ -34,6 +37,7 @@ const SmartDocs: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'docs' | 'analise' | 'busca' | 'chat'>('docs');
+  const [daysUntilReset, setDaysUntilReset] = useState(30);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -68,6 +72,7 @@ const SmartDocs: React.FC = () => {
   };
 
   const handleAnalyzeDocument = async (doc: SmartDoc) => {
+    if (!handleClick()) return;
     setSelectedDoc(doc);
     setAnalysisLoading(true);
     setActiveTab('analise');
@@ -85,6 +90,7 @@ const SmartDocs: React.FC = () => {
   };
 
   const handleChatWithDoc = async () => {
+    if (!handleClick()) return;
     if (!selectedDoc || !chatQuestion) return;
     
     try {
@@ -98,6 +104,7 @@ const SmartDocs: React.FC = () => {
   };
 
   const handleSemanticSearch = async () => {
+    if (!handleClick()) return;
     if (!searchQuery) return;
     
     try {
@@ -126,6 +133,8 @@ const SmartDocs: React.FC = () => {
   };
 
   return (
+    <>
+    <ClickLimitModal isOpen={showLimitModal} daysUntilReset={daysUntilReset} onClose={() => setShowLimitModal(false)} />
     <div className="space-y-6">
       {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -447,6 +456,7 @@ const SmartDocs: React.FC = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

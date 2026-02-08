@@ -5,6 +5,9 @@ import { supabase } from '../services/supabaseClient';
 import { UserRole, CaseStatus, Case, User, Notification, SmartDoc, JurisprudenceResult, AgendaItem, CRMProfile, SavedCalculation } from '../types';
 import { Plus, Briefcase, MessageSquare, Check, X, Bell, User as UserIcon, LogOut, Award, DollarSign, Users, Activity, Filter, Search, Save, Settings, Phone, Mail, Shield, AlertCircle, MapPin, CreditCard, Coins, Loader2, Lock, FileText, Calculator, Calendar, Scale, Sparkles, BrainCircuit, TrendingUp, BarChart3, AlertTriangle, Zap, FileSearch, Folders, Clock, Eye, XCircle, Hammer, LayoutGrid, PieChart, ChevronRight, Copy, Printer, BookOpen, Download, RefreshCw, ChevronDown, GraduationCap, Heart, Landmark, BriefcaseBusiness, FileSpreadsheet, Upload, Tags, PenTool, ClipboardList, UserPlus, List, Edit2, Paperclip, Globe, Ban, CheckCircle2, Send } from 'lucide-react';
 import { Chat } from './Chat';
+import ClickCounter from './ClickCounter';
+import { useClickLimit } from '../hooks/useClickLimit';
+import ClickLimitModal from './ClickLimitModal';
 import bannerTeste from '../img/banner_teste.png';
 import { analyzeCaseDescription, calculateCasePrice, autoTagDocument, searchJurisprudence, generateLegalDraft, analyzeCRMRisk, diagnoseIntake, calculateLegalMath, generateClientProfile, generateNextAction, chatWithClientAI, generateClientTags, generateClientReport, suggestDeadlines, generatePreparationChecklist, analyzeAgendaConflicts, generateAgendaSummary, generateIntakeQuestions, estimateCaseValue, analyzeViability } from '../services/geminiService';
 import { calculateRescisaoCompleta, calculateFerias, calculateHorasExtras, calculateCorrecaoMonetaria, calculateJurosMoratorios, calculateAposentadoriaIdade, calculateSELIC, calculatePensaoAlimenticia, calculateHonorarios, calculatePrazoCPC } from '../services/calculatorsService';
@@ -1059,6 +1062,7 @@ const ToolDocs: React.FC = () => {
 
 const ToolJuris: React.FC = () => {
     const { crmClients } = useApp();
+    const { handleClick: recordClick } = useClickLimit();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<JurisprudenceResult[]>([]);
     const [loading, setLoading] = useState(false);
@@ -1086,6 +1090,7 @@ const ToolJuris: React.FC = () => {
 
     const handleSearch = async () => {
         if (!query) return;
+        if (!recordClick()) return;
         setLoading(true);
         try {
             const data = await searchJurisprudence(query);
@@ -1105,6 +1110,7 @@ const ToolJuris: React.FC = () => {
     };
 
     const handleAIAnalysis = async (result: JurisprudenceResult) => {
+        if (!recordClick()) return;
         setSelectedResult(result);
         setAnalysisLoading(true);
         try {
@@ -1578,6 +1584,7 @@ const ToolWriter: React.FC = () => {
 
 const ToolAgenda: React.FC = () => {
     const { agendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, crmClients } = useApp();
+    const { handleClick: recordClick } = useClickLimit();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
@@ -1677,6 +1684,7 @@ const ToolAgenda: React.FC = () => {
     // Gerar sugestão de prazo inteligente
     const handleSuggestDeadline = async () => {
         if (!newItem.title) return alert("Por favor, digite um título para o compromisso");
+        if (!recordClick()) return;
         
         console.log('handleSuggestDeadline called');
         setAiLoading(true);
@@ -2160,6 +2168,7 @@ const ToolAgenda: React.FC = () => {
 };
 
 const ToolIntake: React.FC = () => {
+    const { handleClick: recordClick } = useClickLimit();
     const [step, setStep] = useState(1);
     const [answers, setAnswers] = useState('');
     const [diagnosis, setDiagnosis] = useState<any>(null);
@@ -2169,6 +2178,7 @@ const ToolIntake: React.FC = () => {
     const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
 
     const handleDiagnose = async () => {
+        if (!recordClick()) return;
         setLoading(true);
         try {
             const diag = await diagnoseIntake(answers);
@@ -3333,6 +3343,7 @@ export const ClientDashboard: React.FC = () => {
 
 export const LawyerDashboard: React.FC = () => {
     const { currentUser, cases, acceptCase, logout, subscribePremium, buyJuris, notifications } = useApp();
+    const { handleClick: recordClick, showLimitModal, setShowLimitModal } = useClickLimit();
     const [view, setView] = useState<ViewType>('market');
     const [selectedCase, setSelectedCase] = useState<Case | null>(null);
     const [filterArea, setFilterArea] = useState('');
@@ -3734,6 +3745,8 @@ export const LawyerDashboard: React.FC = () => {
         <div className="min-h-screen bg-slate-50 flex font-sans">
             {/* Modal de Paywall */}
             {showPremiumModal && <PremiumModal />}
+            {/* Modal de Limite de Cliques */}
+            {showBuyModal && <BuyJurisModal />}
 
             {/* Lawyer Sidebar */}
             <div className="w-20 lg:w-64 bg-slate-900 text-white flex flex-col fixed h-full z-20 transition-all duration-300">
@@ -3747,7 +3760,7 @@ export const LawyerDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="px-4 mb-6">
+                <div className="px-4 mb-6 space-y-3">
                     <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
                         {!currentUser?.isPremium && (
                             <button onClick={() => setShowPremiumModal(true)} className="w-full bg-gradient-to-r from-amber-400 to-yellow-600 text-black text-xs font-bold py-2 rounded-lg hover:brightness-110 transition">
@@ -3755,6 +3768,7 @@ export const LawyerDashboard: React.FC = () => {
                             </button>
                         )}
                     </div>
+                    <ClickCounter />
                 </div>
 
                 <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-4">

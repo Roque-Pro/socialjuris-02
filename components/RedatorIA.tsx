@@ -5,6 +5,8 @@ import {
     FileText, Users, Calendar, Lightbulb, Lock, CheckCircle2, Save
 } from 'lucide-react';
 import { useApp } from '../store';
+import { useClickLimit } from '../hooks/useClickLimit';
+import ClickLimitModal from './ClickLimitModal';
 import {
     generateLegalDraft, analyzeCase, generateDraftVariations,
     findRelatedJurisprudence, analyzeDraftStrength, suggestImprovements,
@@ -20,7 +22,9 @@ interface DraftConfig {
 
 const RedatorIA: React.FC = () => {
     const { crmClients, addSmartDoc } = useApp();
+    const { handleClick, showLimitModal, setShowLimitModal, clicksUsed, clicksLimit } = useClickLimit();
     const [step, setStep] = useState<'config' | 'preview' | 'edit' | 'analysis'>('config');
+    const [daysUntilReset, setDaysUntilReset] = useState(30);
     
     console.log('RedatorIA render - step:', step, 'draftResult:', draftResult?.substring(0, 50));
     const [config, setConfig] = useState<DraftConfig>({
@@ -190,6 +194,8 @@ const RedatorIA: React.FC = () => {
     // ===== RENDER =====
 
     return (
+        <>
+        <ClickLimitModal isOpen={showLimitModal} daysUntilReset={daysUntilReset} onClose={() => setShowLimitModal(false)} />
         <div className="space-y-6">
             {/* Description Card */}
             <div className="bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 rounded-2xl p-6 shadow-sm">
@@ -289,8 +295,11 @@ const RedatorIA: React.FC = () => {
 
                             <div className="space-y-2">
                               <button
-                                onClick={handleGenerateVariations}
-                                disabled={loading || !config.clientName || !config.facts}
+                                onClick={() => {
+                                  if (!handleClick()) return;
+                                  handleGenerateVariations();
+                                }}
+                                disabled={loading || !config.clientName || !config.facts || clicksUsed >= clicksLimit}
                                 className="w-full bg-rose-600 text-white py-3 rounded-lg font-bold hover:bg-rose-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
                               >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
@@ -298,6 +307,7 @@ const RedatorIA: React.FC = () => {
                               </button>
                               <button
                                 onClick={() => {
+                                  if (!handleClick()) return;
                                   setLoading(true);
                                   generateLegalDraft(config).then(draft => {
                                     setDraftResult(draft);
@@ -311,7 +321,7 @@ const RedatorIA: React.FC = () => {
                                     setLoading(false);
                                   });
                                 }}
-                                disabled={loading || !config.clientName || !config.facts}
+                                disabled={loading || !config.clientName || !config.facts || clicksUsed >= clicksLimit}
                                 className="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
                               >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
@@ -483,6 +493,7 @@ const RedatorIA: React.FC = () => {
                 </>
             )}
         </div>
+        </>
     );
 };
 
