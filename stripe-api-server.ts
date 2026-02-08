@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { handleCreateJurisCheckout, handleCreateSubscriptionCheckout, handleWebhook } from './api/routes.ts';
+import { handleCreateJurisCheckout, handleCreateSubscriptionCheckout, handleWebhook } from './api/routes';
 
 // Load .env
 dotenv.config({ path: '.env' });
