@@ -5,7 +5,6 @@ import { supabase } from '../services/supabaseClient';
 import { UserRole, CaseStatus, Case, User, Notification, SmartDoc, JurisprudenceResult, AgendaItem, CRMProfile, SavedCalculation } from '../types';
 import { Plus, Briefcase, MessageSquare, Check, X, Bell, User as UserIcon, LogOut, Award, DollarSign, Users, Activity, Filter, Search, Save, Settings, Phone, Mail, Shield, AlertCircle, MapPin, CreditCard, Coins, Loader2, Lock, FileText, Calculator, Calendar, Scale, Sparkles, BrainCircuit, TrendingUp, BarChart3, AlertTriangle, Zap, FileSearch, Folders, Clock, Eye, XCircle, Hammer, LayoutGrid, PieChart, ChevronRight, Copy, Printer, BookOpen, Download, RefreshCw, ChevronDown, GraduationCap, Heart, Landmark, BriefcaseBusiness, FileSpreadsheet, Upload, Tags, PenTool, ClipboardList, UserPlus, List, Edit2, Paperclip, Globe, Ban, CheckCircle2, Send } from 'lucide-react';
 import { Chat } from './Chat';
-import bannerTeste from '../img/banner_teste.png';
 import { analyzeCaseDescription, calculateCasePrice, autoTagDocument, searchJurisprudence, generateLegalDraft, analyzeCRMRisk, diagnoseIntake, calculateLegalMath, generateClientProfile, generateNextAction, chatWithClientAI, generateClientTags, generateClientReport, suggestDeadlines, generatePreparationChecklist, analyzeAgendaConflicts, generateAgendaSummary, generateIntakeQuestions, estimateCaseValue, analyzeViability } from '../services/geminiService';
 import { calculateRescisaoCompleta, calculateFerias, calculateHorasExtras, calculateCorrecaoMonetaria, calculateJurosMoratorios, calculateAposentadoriaIdade, calculateSELIC, calculatePensaoAlimenticia, calculateHonorarios, calculatePrazoCPC } from '../services/calculatorsService';
 
@@ -3558,7 +3557,7 @@ export const LawyerDashboard: React.FC = () => {
                         <div className="hidden lg:flex flex-col">
                             <a href="#" target="_blank" rel="noopener noreferrer" className="fixed hover:opacity-85 transition group" style={{top: '160px', left: 'calc(50% - 648px)', width: '280px'}}>
                                 <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-indigo-300 transition border border-slate-200 group-hover:border-indigo-400 h-[584px]">
-                                    <img src={bannerTeste} alt="Banner" className="w-full h-full object-cover" />
+                                    <img src="/img/banner_teste.png" alt="Banner" className="w-full h-full object-cover" />
                                 </div>
                             </a>
                         </div>
@@ -3665,7 +3664,7 @@ export const LawyerDashboard: React.FC = () => {
                         <div className="hidden lg:flex flex-col">
                             <a href="#" target="_blank" rel="noopener noreferrer" className="fixed hover:opacity-85 transition group" style={{top: '160px', right: 'calc(50% - 898px)', width: '280px'}}>
                                 <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-purple-300 transition border border-slate-200 group-hover:border-indigo-400 h-[584px]">
-                                    <img src={bannerTeste} alt="Banner" className="w-full h-full object-cover" />
+                                    <img src="/img/banner_teste.png" alt="Banner" className="w-full h-full object-cover" />
                                 </div>
                             </a>
                         </div>
