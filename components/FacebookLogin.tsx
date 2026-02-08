@@ -42,26 +42,25 @@ export const FacebookLogin: React.FC<FacebookLoginProps> = ({ onSuccess, onError
     try {
       setIsLoading(true);
 
-      (window as any).FB.login(async (response: any) => {
-        try {
-          if (response.authResponse) {
-            const userData = await facebookAuthService.handleFacebookResponse({
-              accessToken: response.authResponse.accessToken,
-              userID: response.authResponse.userID
-            });
-
+      (window as any).FB.login((response: any) => {
+        if (response.authResponse) {
+          facebookAuthService.handleFacebookResponse({
+            accessToken: response.authResponse.accessToken,
+            userID: response.authResponse.userID
+          }).then((userData) => {
             if (userData) {
               onSuccess(userData);
             } else {
               onError?.('Falha ao processar credencial do Facebook');
             }
-          } else {
-            onError?.('Usuário cancelou o login');
-          }
-        } catch (error) {
-          console.error('Erro ao processar resposta Facebook:', error);
-          onError?.(error instanceof Error ? error.message : 'Erro desconhecido');
-        } finally {
+            setIsLoading(false);
+          }).catch((error) => {
+            console.error('Erro ao processar resposta Facebook:', error);
+            onError?.(error instanceof Error ? error.message : 'Erro desconhecido');
+            setIsLoading(false);
+          });
+        } else {
+          onError?.('Usuário cancelou o login');
           setIsLoading(false);
         }
       }, { scope: 'public_profile,email' });
