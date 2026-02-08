@@ -8,12 +8,29 @@ const app = express();
 const port = process.env.PORT || 10000;
 
 // --- CONFIGURAÇÃO DO SERVIDOR (CORS) ---
-app.use(cors({
-  origin: 'https://socialjuris-02.vercel.app',
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Permitir requisiçõess de qualquer subdomínio do Vercel e localhost
+    const allowedOrigins = [
+      'https://socialjuris-02.vercel.app',
+      'https://socialjuris-02-roque-rafaels-projects.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ];
+    
+    // Se não tiver origin (requisição do Render para si mesmo), permite
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS não permitido'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
