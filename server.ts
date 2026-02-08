@@ -39,9 +39,9 @@ const getSupabase = () => createClient(
 
 // Login Google
 app.post('/api/auth/validate-google', async (req, res) => {
-  const { credential, clientId } = req.body;
+  const { token, clientId } = req.body;
   try {
-    const decoded: any = jwtDecode(credential);
+    const decoded: any = jwtDecode(token);
     if (decoded.aud !== clientId) throw new Error('Audience inválido');
     res.json({ 
       valid: true, 
