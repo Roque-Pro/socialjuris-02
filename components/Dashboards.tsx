@@ -3311,7 +3311,7 @@ export const ClientDashboard: React.FC = () => {
                     </button>
                     <div className="text-center hidden lg:block">
                         <p className="text-xs text-slate-400">
-                            Powered by <a href="https://nexosdigital.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
+                            Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
                         </p>
                     </div>
                 </div>
@@ -3332,7 +3332,7 @@ export const ClientDashboard: React.FC = () => {
                      {renderContent()}
                  </div>
                  <footer className="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-500">
-                     Powered by <a href="https://nexosdigital.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold transition">NexosDigital</a>
+                     Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold transition">NexosDigital</a>
                  </footer>
                  </div>
                  {showBuyModal && <BuyJurisModal />}
@@ -3771,7 +3771,7 @@ export const LawyerDashboard: React.FC = () => {
                     <ClickCounter />
                 </div>
 
-                <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-4">
+                <nav className="flex-1 px-4 space-y-1 overflow-hidden pb-4">
                     <p className="px-2 text-[10px] font-bold text-slate-500 uppercase mt-4 mb-2 hidden lg:block">Navegação</p>
                     <button onClick={() => handleNavigate('market')} className={`w-full flex items-center space-x-3 p-2.5 rounded-lg transition ${view === 'market' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                         <Globe className="w-5 h-5" />
@@ -3838,7 +3838,7 @@ export const LawyerDashboard: React.FC = () => {
                         </button>
                         <div className="text-center hidden lg:block">
                             <p className="text-xs text-slate-400">
-                                Powered by <a href="https://nexosdigital.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
+                                Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
                             </p>
                         </div>
                     </div>
@@ -3904,7 +3904,7 @@ export const AdminDashboard: React.FC = () => {
                         <LogOut className="w-5 h-5 mr-2" /> Sair
                     </button>
                     <span className="text-xs text-slate-500">
-                        Powered by <a href="https://nexosdigital.com" target="_blank" rel="noopener noreferrer" className="text-slate-700 hover:text-slate-900 font-semibold transition">NexosDigital</a>
+                        Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-slate-700 hover:text-slate-900 font-semibold transition">NexosDigital</a>
                     </span>
                 </div>
             </header>

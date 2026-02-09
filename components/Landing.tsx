@@ -39,15 +39,9 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
             <div className="flex items-center space-x-4">
               <button 
                 onClick={() => onAuth('login', UserRole.CLIENT)}
-                className="hidden md:block text-slate-600 hover:text-indigo-600 font-semibold text-sm px-4 py-2"
-              >
-                Entrar
-              </button>
-              <button 
-                onClick={() => onAuth('register', UserRole.CLIENT)}
                 className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-full text-sm font-bold transition shadow-xl hover:shadow-2xl hover:-translate-y-1"
               >
-                Começar Agora
+                Entrar Agora
               </button>
             </div>
           </div>
@@ -582,8 +576,8 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
             <div>
                 <h4 className="text-white font-bold mb-6">Legal</h4>
                 <ul className="space-y-3 text-sm">
-                    <li><a href="#" className="hover:text-indigo-400 transition">Termos de Uso</a></li>
-                    <li><a href="#" className="hover:text-indigo-400 transition">Política de Privacidade</a></li>
+                    <li><a href="/terms.html" className="hover:text-indigo-400 transition">Termos de Uso</a></li>
+                    <li><a href="/privacy.html" className="hover:text-indigo-400 transition">Política de Privacidade</a></li>
                     <li><a href="#" className="hover:text-indigo-400 transition">Compliance</a></li>
                     <li className="pt-4">
                         <button 
