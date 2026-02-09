@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../store';
 import { supabase } from '../services/supabaseClient';
 import { UserRole, CaseStatus, Case, User, Notification, SmartDoc, JurisprudenceResult, AgendaItem, CRMProfile, SavedCalculation } from '../types';
-import { Plus, Briefcase, MessageSquare, Check, X, Bell, User as UserIcon, LogOut, Award, DollarSign, Users, Activity, Filter, Search, Save, Settings, Phone, Mail, Shield, AlertCircle, MapPin, CreditCard, Coins, Loader2, Lock, FileText, Calculator, Calendar, Scale, Sparkles, BrainCircuit, TrendingUp, BarChart3, AlertTriangle, Zap, FileSearch, Folders, Clock, Eye, XCircle, Hammer, LayoutGrid, PieChart, ChevronRight, Copy, Printer, BookOpen, Download, RefreshCw, ChevronDown, GraduationCap, Heart, Landmark, BriefcaseBusiness, FileSpreadsheet, Upload, Tags, PenTool, ClipboardList, UserPlus, List, Edit2, Paperclip, Globe, Ban, CheckCircle2, Send } from 'lucide-react';
+import { Plus, Briefcase, MessageSquare, Check, X, Bell, User as UserIcon, LogOut, Award, DollarSign, Users, Activity, Filter, Search, Save, Settings, Phone, Mail, Shield, AlertCircle, MapPin, CreditCard, Coins, Loader2, Lock, FileText, Calculator, Calendar, Scale, Sparkles, BrainCircuit, TrendingUp, BarChart3, AlertTriangle, Zap, FileSearch, Folders, Clock, Eye, XCircle, Hammer, LayoutGrid, PieChart, ChevronRight, Copy, Printer, BookOpen, Download, RefreshCw, ChevronDown, GraduationCap, Heart, Landmark, BriefcaseBusiness, FileSpreadsheet, Upload, Tags, PenTool, ClipboardList, UserPlus, List, Edit2, Paperclip, Globe, Ban, CheckCircle2, Send, Menu } from 'lucide-react';
 import { Chat } from './Chat';
 import ClickCounter from './ClickCounter';
 import { useClickLimit } from '../hooks/useClickLimit';
@@ -2860,6 +2860,7 @@ export const ClientDashboard: React.FC = () => {
      const [showBuyModal, setShowBuyModal] = useState(false);
      const [showRatingModal, setShowRatingModal] = useState(false);
      const [ratingStars, setRatingStars] = useState(4.5);
+     const [sidebarOpen, setSidebarOpen] = useState(false);
 
      // New Case Form State
      const [description, setDescription] = useState('');
@@ -3277,82 +3278,92 @@ export const ClientDashboard: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex">
-            {/* Sidebar */}
-            <div className="w-20 lg:w-64 bg-slate-900 text-white flex flex-col fixed h-full z-20 transition-all duration-300">
-                <div className="p-6 flex items-center space-x-3">
-                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
-                        <Scale className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-xl font-bold hidden lg:block">
-                        <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
-                    </div>
-                </div>
-                <nav className="flex-1 px-4 space-y-2 mt-8">
-                    <button onClick={() => setView('dashboard')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'dashboard' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <LayoutGrid className="w-5 h-5" />
-                        <span className="hidden lg:block font-medium">Painel</span>
-                    </button>
-                    <button onClick={() => setView('new-case')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'new-case' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <Plus className="w-5 h-5" />
-                        <span className="hidden lg:block font-medium">Novo Caso</span>
-                    </button>
-                    <button onClick={() => setView('notifications')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'notifications' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <Bell className="w-5 h-5" />
-                        <span className="hidden lg:block font-medium">Notificações</span>
-                    </button>
-                    <button onClick={() => setView('profile')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'profile' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <UserIcon className="w-5 h-5" />
-                        <span className="hidden lg:block font-medium">Meu Perfil</span>
-                    </button>
-                </nav>
-                <div className="p-4 border-t border-slate-800 space-y-4">
-                    <button onClick={logout} className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-400 hover:bg-red-900/20 transition">
-                        <LogOut className="w-5 h-5" />
-                        <span className="hidden lg:block font-medium">Sair</span>
-                    </button>
-                    <div className="text-center hidden lg:block">
-                        <p className="text-xs text-slate-400">
-                            Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
+         <div className="min-h-screen bg-slate-50 flex">
+             {/* Sidebar */}
+             <div className={`${sidebarOpen ? 'w-64' : 'w-20'} lg:w-64 bg-slate-900 text-white flex flex-col fixed h-full z-20 transition-all duration-300`}>
+                 <div className="lg:hidden p-3 flex justify-center">
+                     <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2.5 hover:bg-slate-700 rounded-lg transition text-indigo-300">
+                         {sidebarOpen ? (
+                             <X className="w-7 h-7" />
+                         ) : (
+                             <Menu className="w-7 h-7" />
+                         )}
+                     </button>
+                 </div>
+                 <div className="p-4 lg:p-6 flex items-center space-x-3">
+                     <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg flex-shrink-0">
+                         <Scale className="w-6 h-6 text-white" />
+                     </div>
+                     <div className="text-xl font-bold hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>
+                         <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
+                     </div>
+                 </div>
+                 <nav className="flex-1 px-4 space-y-2 mt-8">
+                     <button onClick={() => setView('dashboard')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'dashboard' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <LayoutGrid className="w-5 h-5 flex-shrink-0" />
+                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Painel</span>
+                     </button>
+                     <button onClick={() => setView('new-case')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'new-case' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Plus className="w-5 h-5 flex-shrink-0" />
+                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Novo Caso</span>
+                     </button>
+                     <button onClick={() => setView('notifications')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'notifications' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Bell className="w-5 h-5 flex-shrink-0" />
+                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Notificações</span>
+                     </button>
+                     <button onClick={() => setView('profile')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'profile' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <UserIcon className="w-5 h-5 flex-shrink-0" />
+                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Meu Perfil</span>
+                     </button>
+                 </nav>
+                 <div className="p-4 border-t border-slate-800 space-y-4">
+                     <button onClick={logout} className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-400 hover:bg-red-900/20 transition">
+                         <LogOut className="w-5 h-5 flex-shrink-0" />
+                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Sair</span>
+                     </button>
+                     <div className="text-center hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>
+                         <p className="text-xs text-slate-400">
+                             Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
+                         </p>
+                     </div>
+                 </div>
+             </div>
 
-            {/* Main Content */}
-             <div className="flex-1 ml-20 lg:ml-64 p-8 overflow-y-auto flex flex-col">
-                 <div className="flex-1">
-                     <header className="flex justify-between items-center mb-8">
-                         <div>
-                             <h1 className="text-2xl font-bold text-slate-900 capitalize">{view.replace('-', ' ')}</h1>
-                             <p className="text-slate-500">Bem-vindo, {currentUser?.name}</p>
-                         </div>
-                         <div className="flex items-center space-x-4">
-                             <img src={currentUser?.avatar} alt="Profile" className="w-10 h-10 rounded-full border border-slate-200" />
-                         </div>
-                     </header>
-                     {renderContent()}
-                 </div>
-                 <footer className="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-500">
-                     Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold transition">NexosDigital</a>
-                 </footer>
-                 </div>
-                 {showBuyModal && <BuyJurisModal />}
-                 {showRatingModal && <RatingModal />}
-        </div>
-    );
+             {/* Main Content */}
+              <div className="flex-1 ml-20 lg:ml-64 p-4 lg:p-8 overflow-y-auto flex flex-col">
+                  <div className="flex-1">
+                      <header className="flex justify-between items-center mb-8">
+                          <div>
+                              <h1 className="text-2xl font-bold text-slate-900 capitalize">{view.replace('-', ' ')}</h1>
+                              <p className="text-slate-500">Bem-vindo, {currentUser?.name}</p>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                              <img src={currentUser?.avatar} alt="Profile" className="w-10 h-10 rounded-full border border-slate-200" />
+                          </div>
+                      </header>
+                      {renderContent()}
+                  </div>
+                  <footer className="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-500">
+                      Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold transition">NexosDigital</a>
+                  </footer>
+                  </div>
+                  {showBuyModal && <BuyJurisModal />}
+                  {showRatingModal && <RatingModal />}
+         </div>
+     );
 };
 
 export const LawyerDashboard: React.FC = () => {
-    const { currentUser, cases, acceptCase, logout, subscribePremium, buyJuris, notifications } = useApp();
-    const { handleClick: recordClick, showLimitModal, setShowLimitModal } = useClickLimit();
-    const [view, setView] = useState<ViewType>('market');
-    const [selectedCase, setSelectedCase] = useState<Case | null>(null);
-    const [filterArea, setFilterArea] = useState('');
-    const [searchKeyword, setSearchKeyword] = useState('');
-    const [showPremiumModal, setShowPremiumModal] = useState(false);
-    const [showBuyModal, setShowBuyModal] = useState(false);
-    const [interestedCaseIds, setInterestedCaseIds] = useState<Set<string>>(new Set());
+     const { currentUser, cases, acceptCase, logout, subscribePremium, buyJuris, notifications } = useApp();
+     const { handleClick: recordClick, showLimitModal, setShowLimitModal } = useClickLimit();
+     const [view, setView] = useState<ViewType>('market');
+     const [selectedCase, setSelectedCase] = useState<Case | null>(null);
+     const [filterArea, setFilterArea] = useState('');
+     const [searchKeyword, setSearchKeyword] = useState('');
+     const [showPremiumModal, setShowPremiumModal] = useState(false);
+     const [showBuyModal, setShowBuyModal] = useState(false);
+     const [interestedCaseIds, setInterestedCaseIds] = useState<Set<string>>(new Set());
+     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Buscar casos onde o advogado manifestou interesse
     useEffect(() => {
@@ -3751,20 +3762,29 @@ export const LawyerDashboard: React.FC = () => {
             {showBuyModal && <BuyJurisModal />}
 
             {/* Lawyer Sidebar */}
-            <div className="w-20 lg:w-64 bg-slate-900 text-white flex flex-col fixed h-full z-20 transition-all duration-300">
-                <div className="p-6 flex items-center space-x-3">
-                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
-                        <Scale className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                        <div className="text-xl font-bold hidden lg:block">
-                            <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
-                        </div>
-                        <span className="text-[10px] uppercase tracking-widest text-indigo-400 hidden lg:block">Advogado</span>
-                    </div>
+            <div className={`${sidebarOpen ? 'w-64' : 'w-20'} lg:w-64 bg-slate-900 text-white flex flex-col fixed h-full z-20 transition-all duration-300`}>
+                <div className="lg:hidden p-3 flex justify-center">
+                    <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2.5 hover:bg-slate-700 rounded-lg transition text-indigo-300">
+                        {sidebarOpen ? (
+                            <X className="w-7 h-7" />
+                        ) : (
+                            <Menu className="w-7 h-7" />
+                        )}
+                    </button>
+                </div>
+                <div className="p-4 lg:p-6 flex items-center space-x-3">
+                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg flex-shrink-0">
+                         <Scale className="w-6 h-6 text-white" />
+                     </div>
+                    <div style={{display: sidebarOpen ? 'block' : 'none'}}>
+                         <div className="text-xl font-bold hidden lg:block">
+                             <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
+                         </div>
+                         <span className="text-[10px] uppercase tracking-widest text-indigo-400 hidden lg:block">Advogado</span>
+                     </div>
                 </div>
 
-                <div className="px-4 mb-4 space-y-2">
+                <div className="px-4 mb-4 space-y-2 hidden lg:flex flex-col">
                     <div className="bg-slate-800 rounded-xl p-3 border border-slate-700">
                         {!currentUser?.isPremium && (
                             <button onClick={() => setShowPremiumModal(true)} className="w-full bg-gradient-to-r from-amber-400 to-yellow-600 text-black text-xs font-bold py-1.5 rounded-lg hover:brightness-110 transition">
@@ -3776,75 +3796,75 @@ export const LawyerDashboard: React.FC = () => {
                 </div>
 
                 <nav className="flex-1 px-4 space-y-0.5 overflow-y-auto pb-2">
-                    <p className="px-2 text-[9px] font-bold text-slate-500 uppercase mt-2 mb-1 hidden lg:block">Navegação</p>
+                    <p className="px-2 text-[9px] font-bold text-slate-500 uppercase mt-2 mb-1 hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>Navegação</p>
                     <button onClick={() => handleNavigate('market')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'market' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <Globe className="w-4 h-4" />
-                        <span className="hidden lg:block text-sm font-medium">Oportunidades</span>
+                        <Globe className="w-4 h-4 flex-shrink-0" />
+                        <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Oportunidades</span>
                     </button>
                     <button onClick={() => handleNavigate('my-cases')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'my-cases' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Briefcase className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Meus Casos</span>
+                         <Briefcase className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Meus Casos</span>
                       </button>
 
-                      <p className="px-2 text-[8px] font-bold text-slate-500 uppercase mt-3 mb-1 hidden lg:block">Ferramentas Pro</p>
+                      <p className="px-2 text-[8px] font-bold text-slate-500 uppercase mt-3 mb-1 hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>Ferramentas Pro</p>
                       <button onClick={() => handleNavigate('tool-crm')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-crm' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Users className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">CRM & KYC</span>
-                     </button>
-                     <button onClick={() => handleNavigate('tool-docs')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-docs' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Folders className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Smart Docs</span>
-                     </button>
-                     <button onClick={() => handleNavigate('tool-writer')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-writer' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <PenTool className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Redator IA</span>
-                     </button>
-                     <button onClick={() => handleNavigate('tool-calc')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-calc' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Calculator className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Calculadoras</span>
-                     </button>
-                     <button onClick={() => handleNavigate('tool-juris')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-juris' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Scale className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Jurisprudência</span>
-                     </button>
-                     <button onClick={() => handleNavigate('tool-agenda')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-agenda' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Calendar className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Agenda</span>
-                     </button>
-                     <button onClick={() => handleNavigate('tool-intake')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-intake' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <ClipboardList className="w-4 h-4" />
-                         <span className="hidden lg:block text-sm font-medium">Triagem</span>
-                     </button>
+                         <Users className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>CRM & KYC</span>
+                      </button>
+                      <button onClick={() => handleNavigate('tool-docs')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-docs' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Folders className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Smart Docs</span>
+                      </button>
+                      <button onClick={() => handleNavigate('tool-writer')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-writer' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <PenTool className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Redator IA</span>
+                      </button>
+                      <button onClick={() => handleNavigate('tool-calc')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-calc' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Calculator className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Calculadoras</span>
+                      </button>
+                      <button onClick={() => handleNavigate('tool-juris')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-juris' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Scale className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Jurisprudência</span>
+                      </button>
+                      <button onClick={() => handleNavigate('tool-agenda')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-agenda' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Calendar className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Agenda</span>
+                      </button>
+                      <button onClick={() => handleNavigate('tool-intake')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-intake' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <ClipboardList className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Triagem</span>
+                      </button>
                     </nav>
 
                     <div className="border-t border-slate-800 pt-2">
                     <button onClick={() => handleNavigate('notifications')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'notifications' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <div className="relative">
-                            <Bell className="w-4 h-4" />
-                            {Array.isArray(notifications) && notifications.filter(n => n?.userId === currentUser?.id && !n?.read).length > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[7px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
-                                    {notifications.filter(n => n?.userId === currentUser?.id && !n?.read).length}
-                                </span>
-                            )}
-                        </div>
-                        <span className="hidden lg:block text-sm font-medium">Notificações</span>
-                    </button>
-                    <button onClick={() => handleNavigate('profile')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'profile' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <Settings className="w-4 h-4" />
-                        <span className="hidden lg:block text-sm font-medium">Ajustes</span>
-                    </button>
-                    </div>
-                    <div className="px-2 py-2 border-t border-slate-800 space-y-1">
-                    <button onClick={logout} className="w-full flex items-center space-x-2.5 p-2.5 rounded-lg text-red-400 hover:bg-red-900/20 transition">
-                        <LogOut className="w-4 h-4" />
-                        <span className="hidden lg:block text-sm font-medium">Sair</span>
-                    </button>
-                    <div className="text-center hidden lg:block">
-                        <p className="text-[10px] text-slate-400">
-                            Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
-                        </p>
-                    </div>
-                    </div>
+                         <div className="relative flex-shrink-0">
+                             <Bell className="w-4 h-4" />
+                             {Array.isArray(notifications) && notifications.filter(n => n?.userId === currentUser?.id && !n?.read).length > 0 && (
+                                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[7px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center">
+                                     {notifications.filter(n => n?.userId === currentUser?.id && !n?.read).length}
+                                 </span>
+                             )}
+                         </div>
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Notificações</span>
+                     </button>
+                     <button onClick={() => handleNavigate('profile')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'profile' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Settings className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Ajustes</span>
+                     </button>
+                     </div>
+                     <div className="px-2 py-2 border-t border-slate-800 space-y-1">
+                     <button onClick={logout} className="w-full flex items-center space-x-2.5 p-2.5 rounded-lg text-red-400 hover:bg-red-900/20 transition">
+                         <LogOut className="w-4 h-4 flex-shrink-0" />
+                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Sair</span>
+                     </button>
+                     <div className="text-center hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>
+                         <p className="text-[10px] text-slate-400">
+                             Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
+                         </p>
+                     </div>
+                     </div>
             </div>
 
             {/* Lawyer Main Content */}
