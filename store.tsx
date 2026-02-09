@@ -67,28 +67,33 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Click counter
   const [clicksUsed, setClicksUsed] = useState<number>(0);
   const clicksLimit = 5000;
-  const [clicksResetDate, setClicksResetDate] = useState<string>(localStorage.getItem('clicksResetDate') || new Date().toISOString());
+  const [clicksResetDate, setClicksResetDate] = useState<string>(new Date().toISOString());
 
   // Carregar clicks do localStorage ao montar
   useEffect(() => {
     if (currentUser) {
       const savedClicks = localStorage.getItem(`clicks_${currentUser.id}`);
-      const savedResetDate = localStorage.getItem(`clicksResetDate_${currentUser.id}`);
+      let savedResetDate = localStorage.getItem(`clicksResetDate_${currentUser.id}`);
       
-      if (savedResetDate) {
-        const lastReset = new Date(savedResetDate);
-        const now = new Date();
-        
-        // Se passou 30 dias, reset
-        if ((now.getTime() - lastReset.getTime()) > (30 * 24 * 60 * 60 * 1000)) {
-          setClicksUsed(0);
-          const newResetDate = now.toISOString();
-          localStorage.setItem(`clicksResetDate_${currentUser.id}`, newResetDate);
-          setClicksResetDate(newResetDate);
-        } else {
-          setClicksUsed(savedClicks ? parseInt(savedClicks) : 0);
-          setClicksResetDate(savedResetDate);
-        }
+      if (!savedResetDate) {
+        // Primeira vez - inicializar data de reset
+        savedResetDate = new Date().toISOString();
+        localStorage.setItem(`clicksResetDate_${currentUser.id}`, savedResetDate);
+      }
+      
+      const lastReset = new Date(savedResetDate);
+      const now = new Date();
+      
+      // Se passou 30 dias, reset
+      if ((now.getTime() - lastReset.getTime()) > (30 * 24 * 60 * 60 * 1000)) {
+        setClicksUsed(0);
+        localStorage.setItem(`clicks_${currentUser.id}`, '0');
+        const newResetDate = now.toISOString();
+        localStorage.setItem(`clicksResetDate_${currentUser.id}`, newResetDate);
+        setClicksResetDate(newResetDate);
+      } else {
+        setClicksUsed(savedClicks ? parseInt(savedClicks) : 0);
+        setClicksResetDate(savedResetDate);
       }
     }
   }, [currentUser?.id]);
