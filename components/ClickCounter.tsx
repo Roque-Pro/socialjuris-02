@@ -24,21 +24,19 @@ const ClickCounter: React.FC = () => {
   const remaining = clicksLimit - clicksUsed;
 
   return (
-    <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-4 border border-slate-700">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-amber-400" />
-          <span className="font-bold text-slate-100">Cliques do Plano</span>
-        </div>
-        <div className="text-right">
-          <div className="text-xs text-slate-400 flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            Reset em {daysUntilReset} dias
-          </div>
-        </div>
+    <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-3 border border-slate-700">
+      <div className="flex justify-between items-center">
+        <span className="text-base font-bold text-slate-100">
+          {clicksUsed.toLocaleString()} / {clicksLimit.toLocaleString()}
+        </span>
+        <span className={`text-base font-bold ${
+          remaining > 0 ? 'text-green-400' : 'text-red-400'
+        }`}>
+          {remaining > 0 ? `${remaining.toLocaleString()} restantes` : 'LIMITE ATINGIDO'}
+        </span>
       </div>
 
-      <div className="space-y-2">
+      <div className="mt-2">
         {/* Progress Bar */}
         <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
           <div
@@ -51,18 +49,6 @@ const ClickCounter: React.FC = () => {
             }`}
             style={{ width: `${Math.min(percentage, 100)}%` }}
           />
-        </div>
-
-        {/* Stats */}
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-bold text-slate-100">
-            {clicksUsed.toLocaleString()} / {clicksLimit.toLocaleString()}
-          </span>
-          <span className={`text-sm font-bold ${
-            remaining > 0 ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {remaining > 0 ? `${remaining.toLocaleString()} restantes` : 'LIMITE ATINGIDO'}
-          </span>
         </div>
 
         {/* Warnings */}

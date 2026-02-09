@@ -26,7 +26,9 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
               <div className="bg-gradient-to-br from-indigo-600 to-violet-600 p-2.5 rounded-xl shadow-lg shadow-indigo-200">
                 <Scale className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-slate-900 tracking-tight">SocialJuris</span>
+              <div className="text-2xl font-bold text-slate-900 tracking-tight">
+                <span className="text-indigo-600">Social</span><span className="text-violet-600">Jurídico</span>
+              </div>
             </div>
             
             <div className="hidden lg:flex space-x-10 text-sm font-medium text-slate-600">
@@ -148,7 +150,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
       <div id="diferenciais" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Por que o SocialJuris é diferente?</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Por que o <span className="text-indigo-600">Social</span><span className="text-violet-600">Jurídico</span> é diferente?</h2>
                 <p className="text-lg text-slate-600 max-w-2xl mx-auto">Deixamos a burocracia no passado. Trouxemos a advocacia para a era digital.</p>
             </div>
 
@@ -176,10 +178,10 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
                     </ul>
                 </div>
 
-                {/* O SocialJuris */}
+                {/* O SocialJuridico */}
                 <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-3xl shadow-2xl shadow-indigo-200 text-white transform md:scale-105 relative">
                     <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/30">O FUTURO</div>
-                    <h3 className="text-2xl font-bold mb-6 flex items-center"><Zap className="w-6 h-6 mr-2 fill-yellow-400 text-yellow-400"/> SocialJuris</h3>
+                    <h3 className="text-2xl font-bold mb-6 flex items-center"><Zap className="w-6 h-6 mr-2 fill-yellow-400 text-yellow-400"/><span className="text-yellow-100">Social</span><span className="text-amber-100">Jurídico</span></h3>
                     <ul className="space-y-4">
                         <li className="flex items-start">
                             <CheckCircle className="w-5 h-5 mr-3 text-green-400 mt-0.5 flex-shrink-0" />
@@ -354,7 +356,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
                       </div>
                     </div>
                     <p className="text-slate-700 text-sm mb-3">
-                      "Meu caso foi resolvido em 30 dias! O advogado foi super atencioso, explicou tudo de forma clara. Recomendo demais o SocialJuris!"
+                      "Meu caso foi resolvido em 30 dias! O advogado foi super atencioso, explicou tudo de forma clara. Recomendo demais o <span className="text-indigo-600">Social</span><span className="text-violet-600">Jurídico</span>!"
                     </p>
                     <div className="flex space-x-2 text-yellow-400 text-xs">
                       <Star className="fill-current w-4 h-4" />
@@ -493,7 +495,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
                     { q: "O cadastro é gratuito?", a: "Sim! O cadastro na plataforma é 100% gratuito. Publicar seu caso também é totalmente grátis. Você não paga nada para conectar-se aos advogados qualificados." },
                     { q: "Os advogados são confiáveis?", a: "Sim, buscamos criar um ambiente profissional. Todos os advogados precisam informar seu número de registro na OAB para atuar na plataforma." },
                     { q: "Como funciona o contato?", a: "Após publicar seu caso, ele fica visível para advogados. Quando um profissional aceita o caso, um chat seguro é aberto para vocês conversarem." },
-                    { q: "Posso usar no celular?", a: "Sim, o SocialJuris é 100% responsivo e funciona perfeitamente em smartphones, tablets e computadores." }
+                    { q: "Posso usar no celular?", a: "Sim, o SocialJurídico é 100% responsivo e funciona perfeitamente em smartphones, tablets e computadores." }
                 ].map((item, index) => (
                     <div key={index} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         <button 
@@ -540,7 +542,9 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
             <div>
                 <div className="flex items-center space-x-2 mb-6">
                     <Scale className="h-6 w-6 text-indigo-500" />
-                    <span className="text-2xl font-bold text-white">SocialJuris</span>
+                    <div className="text-2xl font-bold text-white">
+                        <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
+                    </div>
                 </div>
                 <p className="text-sm leading-relaxed mb-6">
                     A plataforma líder em conectar clientes a oportunidades jurídicas. Tecnologia a serviço da justiça.
@@ -592,7 +596,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
             </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-900 text-center text-sm">
-            © 2024 SocialJuris Tecnologia Jurídica Ltda. Todos os direitos reservados.
+            © 2024 <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span> Tecnologia Jurídica Ltda. Todos os direitos reservados.
         </div>
       </footer>
     </div>
