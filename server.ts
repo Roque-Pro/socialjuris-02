@@ -9,8 +9,8 @@ const port = process.env.PORT || 10000;
 
 // --- 1. CONFIGURAÇÃO DE SEGURANÇA (CORS) ---
 const allowedOrigins = [
-  'https://socialjuris-02.vercel.app',
-  'https://socialjuris-02-roque-rafaels-projects.vercel.app',
+  'https://socialjuridico-roque-rafaels-projects.vercel.app',
+  'https://socialjuridico-roque-rafaels-projects.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173',
 ];

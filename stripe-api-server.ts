@@ -17,8 +17,8 @@ const PORT = process.env.STRIPE_API_PORT || 3001;
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  'https://socialjuris-02.vercel.app',
-  'https://socialjuris-02-roque-rafaels-projects.vercel.app',
+  'https://socialjuridico-roque-rafaels-projects.vercel.app',
+  'https://socialjuridico-roque-rafaels-projects.vercel.app',
   'https://socialjuris-02.onrender.com',
   process.env.FRONTEND_URL || '' // Adicional para flexibilidade
 ];
