@@ -3294,34 +3294,34 @@ export const ClientDashboard: React.FC = () => {
                      <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg flex-shrink-0">
                          <Scale className="w-6 h-6 text-white" />
                      </div>
-                     <div className="text-xl font-bold hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>
+                     <div className={`text-xl font-bold ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
                          <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
                      </div>
                  </div>
                  <nav className="flex-1 px-4 space-y-2 mt-8">
                      <button onClick={() => setView('dashboard')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'dashboard' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <LayoutGrid className="w-5 h-5 flex-shrink-0" />
-                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Painel</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block font-medium`}>Painel</span>
                      </button>
                      <button onClick={() => setView('new-case')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'new-case' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Plus className="w-5 h-5 flex-shrink-0" />
-                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Novo Caso</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block font-medium`}>Novo Caso</span>
                      </button>
                      <button onClick={() => setView('notifications')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'notifications' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Bell className="w-5 h-5 flex-shrink-0" />
-                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Notificações</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block font-medium`}>Notificações</span>
                      </button>
                      <button onClick={() => setView('profile')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition ${view === 'profile' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <UserIcon className="w-5 h-5 flex-shrink-0" />
-                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Meu Perfil</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block font-medium`}>Meu Perfil</span>
                      </button>
                  </nav>
                  <div className="p-4 border-t border-slate-800 space-y-4">
                      <button onClick={logout} className="w-full flex items-center space-x-3 p-3 rounded-xl text-red-400 hover:bg-red-900/20 transition">
                          <LogOut className="w-5 h-5 flex-shrink-0" />
-                         <span className="hidden lg:block font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Sair</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block font-medium`}>Sair</span>
                      </button>
-                     <div className="text-center hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>
+                     <div className={`text-center ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
                          <p className="text-xs text-slate-400">
                              Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
                          </p>
@@ -3776,11 +3776,11 @@ export const LawyerDashboard: React.FC = () => {
                     <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg flex-shrink-0">
                          <Scale className="w-6 h-6 text-white" />
                      </div>
-                    <div style={{display: sidebarOpen ? 'block' : 'none'}}>
-                         <div className="text-xl font-bold hidden lg:block">
+                    <div className={`${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
+                         <div className="text-xl font-bold">
                              <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span>
                          </div>
-                         <span className="text-[10px] uppercase tracking-widest text-indigo-400 hidden lg:block">Advogado</span>
+                         <span className="text-[10px] uppercase tracking-widest text-indigo-400">Advogado</span>
                      </div>
                 </div>
 
@@ -3796,44 +3796,44 @@ export const LawyerDashboard: React.FC = () => {
                 </div>
 
                 <nav className="flex-1 px-4 space-y-0.5 overflow-y-auto pb-2">
-                    <p className="px-2 text-[9px] font-bold text-slate-500 uppercase mt-2 mb-1 hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>Navegação</p>
-                    <button onClick={() => handleNavigate('market')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'market' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                        <Globe className="w-4 h-4 flex-shrink-0" />
-                        <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Oportunidades</span>
-                    </button>
-                    <button onClick={() => handleNavigate('my-cases')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'my-cases' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
-                         <Briefcase className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Meus Casos</span>
-                      </button>
+                    <p className={`px-2 text-[9px] font-bold text-slate-500 uppercase mt-2 mb-1 ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>Navegação</p>
+                     <button onClick={() => handleNavigate('market')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'market' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                         <Globe className="w-4 h-4 flex-shrink-0" />
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Oportunidades</span>
+                     </button>
+                     <button onClick={() => handleNavigate('my-cases')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'my-cases' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+                          <Briefcase className="w-4 h-4 flex-shrink-0" />
+                          <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Meus Casos</span>
+                       </button>
 
-                      <p className="px-2 text-[8px] font-bold text-slate-500 uppercase mt-3 mb-1 hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>Ferramentas Pro</p>
+                       <p className={`px-2 text-[8px] font-bold text-slate-500 uppercase mt-3 mb-1 ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>Ferramentas Pro</p>
                       <button onClick={() => handleNavigate('tool-crm')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-crm' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Users className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>CRM & KYC</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>CRM & KYC</span>
                       </button>
                       <button onClick={() => handleNavigate('tool-docs')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-docs' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Folders className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Smart Docs</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Smart Docs</span>
                       </button>
                       <button onClick={() => handleNavigate('tool-writer')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-writer' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <PenTool className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Redator IA</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Redator IA</span>
                       </button>
                       <button onClick={() => handleNavigate('tool-calc')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-calc' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Calculator className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Calculadoras</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Calculadoras</span>
                       </button>
                       <button onClick={() => handleNavigate('tool-juris')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-juris' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Scale className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Jurisprudência</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Jurisprudência</span>
                       </button>
                       <button onClick={() => handleNavigate('tool-agenda')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-agenda' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Calendar className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Agenda</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Agenda</span>
                       </button>
                       <button onClick={() => handleNavigate('tool-intake')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'tool-intake' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <ClipboardList className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Triagem</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Triagem</span>
                       </button>
                     </nav>
 
@@ -3847,19 +3847,19 @@ export const LawyerDashboard: React.FC = () => {
                                  </span>
                              )}
                          </div>
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Notificações</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Notificações</span>
                      </button>
                      <button onClick={() => handleNavigate('profile')} className={`w-full flex items-center space-x-2.5 p-2.5 rounded-lg transition ${view === 'profile' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}>
                          <Settings className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Ajustes</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Ajustes</span>
                      </button>
                      </div>
                      <div className="px-2 py-2 border-t border-slate-800 space-y-1">
                      <button onClick={logout} className="w-full flex items-center space-x-2.5 p-2.5 rounded-lg text-red-400 hover:bg-red-900/20 transition">
                          <LogOut className="w-4 h-4 flex-shrink-0" />
-                         <span className="hidden lg:block text-sm font-medium" style={{display: sidebarOpen ? 'block' : 'none'}}>Sair</span>
+                         <span className={`${sidebarOpen ? 'block' : 'hidden'} lg:block text-sm font-medium`}>Sair</span>
                      </button>
-                     <div className="text-center hidden lg:block" style={{display: sidebarOpen ? 'block' : 'none'}}>
+                     <div className={`text-center ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
                          <p className="text-[10px] text-slate-400">
                              Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
                          </p>
