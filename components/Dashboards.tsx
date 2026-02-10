@@ -3323,7 +3323,7 @@ export const ClientDashboard: React.FC = () => {
                      </button>
                      <div className={`text-center ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
                          <p className="text-xs text-slate-400">
-                             Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
+                             Powered by <a href="https://nexos-digital.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
                          </p>
                      </div>
                  </div>
@@ -3344,7 +3344,7 @@ export const ClientDashboard: React.FC = () => {
                       {renderContent()}
                   </div>
                   <footer className="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-500">
-                      Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold transition">NexosDigital</a>
+                      Powered by <a href="https://nexos-digital.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold transition">NexosDigital</a>
                   </footer>
                   </div>
                   {showBuyModal && <BuyJurisModal />}
@@ -3861,7 +3861,7 @@ export const LawyerDashboard: React.FC = () => {
                      </button>
                      <div className={`text-center ${sidebarOpen ? 'block' : 'hidden'} lg:block`}>
                          <p className="text-[10px] text-slate-400">
-                             Powered by <a href="https://wa.me/5532991075164" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
+                             Powered by <a href="https://nexos-digital.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 font-semibold transition">NexosDigital</a>
                          </p>
                      </div>
                      </div>

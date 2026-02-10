@@ -596,7 +596,12 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
             </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-900 text-center text-sm">
-            © 2024 <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span> Tecnologia Jurídica Ltda. Todos os direitos reservados.
+            <div className="mb-2">
+                © 2024 <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span> Tecnologia Jurídica Ltda. Todos os direitos reservados.
+            </div>
+            <div className="text-xs text-slate-500">
+                Desenvolvido por <a href="https://nexos-digital.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-indigo-400 transition font-medium">NexosDigital</a>
+            </div>
         </div>
       </footer>
     </div>
