@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/alabamco/public_html/
+    - export DEPLOYPATH=/home/alabamco/socialjuridico.com.br/
     - /bin/cp -R * $DEPLOYPATH
