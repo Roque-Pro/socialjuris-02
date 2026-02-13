@@ -7,6 +7,7 @@ import {
 import { useApp } from '../store';
 import { useClickLimit } from '../hooks/useClickLimit';
 import ClickLimitModal from './ClickLimitModal';
+import MarketPricesIndex from './MarketPricesIndex';
 import {
     generateLegalDraft, analyzeCase, generateDraftVariations,
     findRelatedJurisprudence, analyzeDraftStrength, suggestImprovements,
@@ -23,27 +24,59 @@ interface DraftConfig {
 const RedatorIA: React.FC = () => {
     const { crmClients, addSmartDoc } = useApp();
     const { handleClick, showLimitModal, setShowLimitModal, clicksUsed, clicksLimit } = useClickLimit();
-    const [step, setStep] = useState<'config' | 'preview' | 'edit' | 'analysis'>('config');
+    
+    // Carregar estado persistido do localStorage
+    const loadPersistedState = () => {
+        try {
+            const saved = localStorage.getItem('redatorIA_state');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('Erro ao carregar estado persistido:', e);
+        }
+        return null;
+    };
+
+    const persistedState = loadPersistedState();
+
+    const [step, setStep] = useState<'config' | 'preview' | 'edit' | 'analysis'>(persistedState?.step || 'config');
     const [daysUntilReset, setDaysUntilReset] = useState(30);
     
-    console.log('RedatorIA render - step:', step, 'draftResult:', draftResult?.substring(0, 50));
-    const [config, setConfig] = useState<DraftConfig>({
+    console.log('RedatorIA render - step:', step, 'draftResult:', persistedState?.draftResult?.substring(0, 50));
+    const [config, setConfig] = useState<DraftConfig>(persistedState?.config || {
         type: 'Peticao Inicial',
         clientName: '',
         facts: '',
         tone: 'Formal'
     });
 
-    const [draftResult, setDraftResult] = useState('');
-    const [variations, setVariations] = useState<any>(null);
-    const [caseAnalysis, setCaseAnalysis] = useState<any>(null);
-    const [jurisprudence, setJurisprudence] = useState<any>(null);
-    const [strength, setStrength] = useState<any>(null);
-    const [compliance, setCompliance] = useState<any>(null);
+    const [draftResult, setDraftResult] = useState(persistedState?.draftResult || '');
+    const [variations, setVariations] = useState<any>(persistedState?.variations || null);
+    const [caseAnalysis, setCaseAnalysis] = useState<any>(persistedState?.caseAnalysis || null);
+    const [jurisprudence, setJurisprudence] = useState<any>(persistedState?.jurisprudence || null);
+    const [strength, setStrength] = useState<any>(persistedState?.strength || null);
+    const [compliance, setCompliance] = useState<any>(persistedState?.compliance || null);
     const [loading, setLoading] = useState(false);
     const [savingToSmartDocs, setSavingToSmartDocs] = useState(false);
-    const [selectedVariation, setSelectedVariation] = useState('balanced');
+    const [selectedVariation, setSelectedVariation] = useState(persistedState?.selectedVariation || 'balanced');
     const [saveSuccess, setSaveSuccess] = useState(false);
+
+    // Salvar estado no localStorage sempre que muda
+    React.useEffect(() => {
+        const stateToSave = {
+            step,
+            config,
+            draftResult,
+            variations,
+            caseAnalysis,
+            jurisprudence,
+            strength,
+            compliance,
+            selectedVariation
+        };
+        localStorage.setItem('redatorIA_state', JSON.stringify(stateToSave));
+    }, [step, config, draftResult, variations, caseAnalysis, jurisprudence, strength, compliance, selectedVariation]);
 
     const handleAnalyzeCase = async () => {
         setLoading(true);
@@ -191,12 +224,97 @@ const RedatorIA: React.FC = () => {
         document.body.removeChild(element);
     };
 
+    const handleExportPDF = () => {
+        if (!draftResult) return;
+
+        // Criar iframe para impressão
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframeDoc) return;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>${config.type}</title>
+                <style>
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        font-size: 12px;
+                        line-height: 1.8;
+                        color: #000;
+                        margin: 20px;
+                        padding: 0;
+                    }
+                    h2 {
+                        text-align: center;
+                        font-size: 16px;
+                        font-weight: bold;
+                        margin-bottom: 30px;
+                    }
+                    .content {
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                        text-align: justify;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        text-align: right;
+                        font-size: 10px;
+                        color: #666;
+                    }
+                </style>
+            </head>
+            <body>
+                <h2>${config.type}</h2>
+                <div class="content">${draftResult}</div>
+                <div class="footer">
+                    <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+
+        // Aguardar o iframe carregar antes de imprimir
+        iframe.onload = () => {
+            iframe.contentWindow?.print();
+            // Remover iframe após um tempo
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
+    };
+
     // ===== RENDER =====
+
+    const handleClearState = () => {
+        localStorage.removeItem('redatorIA_state');
+        setStep('config');
+        setConfig({ type: 'Peticao Inicial', clientName: '', facts: '', tone: 'Formal' });
+        setDraftResult('');
+        setVariations(null);
+        setCaseAnalysis(null);
+        setJurisprudence(null);
+        setStrength(null);
+        setCompliance(null);
+        setSelectedVariation('balanced');
+    };
 
     return (
         <>
         <ClickLimitModal isOpen={showLimitModal} daysUntilReset={daysUntilReset} onClose={() => setShowLimitModal(false)} />
         <div className="space-y-6">
+            {/* Índice de Preços de Mercado */}
+            <MarketPricesIndex />
+
             {/* Description Card */}
             <div className="bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 rounded-2xl p-6 shadow-sm">
                 <div className="flex items-start gap-4">
@@ -242,6 +360,9 @@ const RedatorIA: React.FC = () => {
                                     <option>Procuração</option>
                                     <option>Parecer Jurídico</option>
                                     <option>Recurso</option>
+                                    <option>Embargos</option>
+                                    <option>Manifestação</option>
+                                    <option>Notificação Extrajudicial</option>
                                 </select>
                             </div>
 
@@ -424,7 +545,7 @@ const RedatorIA: React.FC = () => {
                                     <span className="text-xs">Copiar</span>
                                 </button>
                                 <button
-                                    onClick={() => window.print()}
+                                    onClick={handleExportPDF}
                                     className="bg-slate-600 text-white py-2 px-3 rounded-lg font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2"
                                     title="Salvar como PDF"
                                 >
@@ -464,6 +585,13 @@ const RedatorIA: React.FC = () => {
                                 >
                                     <Sparkles className="w-4 h-4" />
                                     <span className="text-xs">Nova</span>
+                                </button>
+                                <button
+                                    onClick={handleClearState}
+                                    className="bg-slate-400 text-white py-2 px-3 rounded-lg font-bold hover:bg-slate-500 transition flex items-center justify-center gap-2 text-xs"
+                                    title="Limpar tudo"
+                                >
+                                    <span className="text-xs">Limpar</span>
                                 </button>
                             </div>
                         </div>

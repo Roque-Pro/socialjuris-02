@@ -3,10 +3,12 @@ import { AppProvider, useApp } from './store';
 import { UserRole } from './types';
 import { Landing } from './components/Landing';
 import { ClientDashboard, LawyerDashboard, AdminDashboard } from './components/Dashboards';
+import { DataDeletionRequest } from './components/DataDeletionRequest';
 import { Loader2, Mail, Lock, User, Briefcase, ChevronRight } from 'lucide-react';
 import { GoogleLogin } from './components/GoogleLogin';
 import { FacebookLogin } from './components/FacebookLogin';
 import { OAuthButtons } from './components/OAuthButtons';
+import { FacebookGroupModal } from './components/FacebookGroupModal';
 
 const AuthScreen = ({ 
   type, 
@@ -212,16 +214,58 @@ const AuthScreen = ({
           };
 
 const MainApp = () => {
-  const { currentUser } = useApp();
+  const { currentUser, updateUserProfile } = useApp();
   const [authView, setAuthView] = useState<{ type: 'login' | 'register', role: UserRole } | null>(null);
+  const [showFacebookModal, setShowFacebookModal] = useState(false);
+  const [hasSeenModal, setHasSeenModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState<string>('home');
+
+  // Monitorar mudanças de rota via URL
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/data-deletion') {
+      setCurrentPage('data-deletion');
+    } else {
+      setCurrentPage('home');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Mostrar modal em TODOS os logins para sempre alimentar o indicador
+    if (currentUser && !hasSeenModal) {
+      const delay = setTimeout(() => {
+        setShowFacebookModal(true);
+        setHasSeenModal(true);
+      }, 500); // Pequeno delay para melhor UX
+      return () => clearTimeout(delay);
+    }
+  }, [currentUser, hasSeenModal]);
+
+  const handleFacebookGroupYes = async () => {
+    if (currentUser) {
+      await updateUserProfile(currentUser.id, { fromFacebookGroup: true });
+    }
+    setShowFacebookModal(false);
+  };
 
   if (currentUser) {
-    switch (currentUser.role) {
-      case UserRole.CLIENT: return <ClientDashboard />;
-      case UserRole.LAWYER: return <LawyerDashboard />;
-      case UserRole.ADMIN: return <AdminDashboard />;
-      default: return <div>Erro: Papel desconhecido ou não autorizado.</div>;
-    }
+    return (
+      <>
+        {(() => {
+          switch (currentUser.role) {
+            case UserRole.CLIENT: return <ClientDashboard />;
+            case UserRole.LAWYER: return <LawyerDashboard />;
+            case UserRole.ADMIN: return <AdminDashboard />;
+            default: return <div>Erro: Papel desconhecido ou não autorizado.</div>;
+          }
+        })()}
+        <FacebookGroupModal 
+          isOpen={showFacebookModal} 
+          onClose={() => setShowFacebookModal(false)}
+          onYes={handleFacebookGroupYes}
+        />
+      </>
+    );
   }
 
   const toggleAuthMode = () => {
@@ -232,6 +276,23 @@ const MainApp = () => {
       });
     }
   };
+
+  // Se estiver na página de exclusão de dados
+  if (currentPage === 'data-deletion') {
+    return (
+      <>
+        <DataDeletionRequest />
+        <footer className="bg-slate-950 text-slate-400 py-8 border-t border-slate-900 text-center text-sm">
+          <div className="mb-2">
+            © 2024 <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span> Tecnologia Jurídica Ltda. Todos os direitos reservados.
+          </div>
+          <div className="text-xs text-slate-500">
+            <a href="/" className="text-slate-400 hover:text-indigo-400 transition">← Voltar para Home</a>
+          </div>
+        </footer>
+      </>
+    );
+  }
 
   if (authView) {
     return (

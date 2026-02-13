@@ -25,6 +25,7 @@ export interface User {
   bio?: string;
   balance?: number;
   createdAt: string;
+  fromFacebookGroup?: boolean;
 }
 
 export interface Message {
@@ -124,7 +125,7 @@ export interface AgendaItem {
   title: string;
   description?: string;
   date: string; // ISO
-  type: 'Judicial' | 'Administrativo' | 'Interno' | 'Diligencia';
+  type: 'Judicial' | 'Administrativo' | 'Interno' | 'Diligencia' | 'Extra Judicial';
   urgency: 'Alta' | 'Média' | 'Baixa';
   clientId?: string;
   clientName?: string; // Helper UI

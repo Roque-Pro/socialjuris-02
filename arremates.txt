@@ -1,0 +1,83 @@
+ESTAMOS DESENVOLVENDO E FAZENDO EDIÇÕES NO NOSSO SISTEMA A PARTIR DE UMA LISTA DE TAREFAS QUE ESTAMOS INDO ITEM A ITEM E RESPONDENDO E FAZENDO A IMPLEMENTAÇÃO SE NECESSÁRIO. FAÇA SEMPRE COM CUIDADO, NÃO IMPLEMENTE NADA QUE POSSA SPREJUDICAR U INFLUENCIAR NO FUNCIONAMENTO DE OUTRA, NÃO PRECISA DOCUMENTAR NADA. E FOCO NA QUESTAO EM QUESTAO, E NÃO ATROPELE. EU VOU DANDO O OK PARA AS PROXIMAS.
+
+
+
+1- Após as simulações e os casos simulados que fizemos deu para ter uma ideia de como o Advogado se depara com as oportunidades disponíveis pra ele, mas como será feita essa exposição, essa rotatividade das oportunidades, para os advogados ? Só apagam as que forem "contratatdas"?
+
+✅ RESPONDIDO: As oportunidades aparecem para todos os advogados enquanto estão abertas. Quando um advogado se interessa, o sistema trava um crédito dele por 7 dias (como uma "ficha" para garantir que ele está realmente comprometido). Se o cliente escolher esse advogado, a oportunidade sai do mercado e vira um caso ativo. Se o cliente escolher outro ou ninguém se interessar, após 7 dias o crédito é devolvido e a oportunidade continua disponível para outros advogados. É tipo um leilão onde você coloca uma ficha, mas se não ganhar, recupera ela depois.
+
+2- Eu não consegui fazer a busca por área jurídica, será que não é pelo caso de ter duplicidades, como por exemplo, direito do trabalho e também direito trabalhista, não teria que ser usado um só termo para ambos?
+
+✅ CORRIGIDO: Exatamente! O sistema estava buscando por correspondência exata de texto e não encontrava "direito trabalhista" quando você digita "direito do trabalho". Implementei uma normalização que converte todos esses termos duplicados para um único padrão na busca, então agora "Direito Trabalhista" e "Direito do Trabalho" funcionam normalmente. Fiz o mesmo para Família/Familiarista e Consumidor/Consumerista.
+
+3- Não consegui fazer o teste do funcionamento da câmera do chat, (estava testando, cliente e advogado no mesmo equipamento) 
+
+✅ RESPONDIDO:Não conseguiu porque ? Porque não funcionou ou não conseguiu testar e quer auxilio?
+
+4-Aparece a informação nas notificações "o cliente escolheu você para o caso" deveria conter também a seguinte informação "O chat está liberado em meus casos" Porque ao receber a notificação automaticamente se pensa que ao clicar nela essa ação será concluída, ou seja, direcionar você para o chat… Se isso fosse possível também serio muito bom
+
+✅ RESPONDIDO: A mensagem "O chat está liberado em meus casos" já aparece na notificação. Agora quando o advogado clica em uma notificação de "Proposta Aceita" ou de interesse manifestado, o sistema automaticamente abre a aba "Meus Casos" para que ele acesse o chat imediatamente. Bem mais intuitivo!
+
+5- Nas escritas das notas internas aparece um simbolo/ logo de  uma uma letra G verde no canto inferior direito e ao clicar nela aparecem vários temas em inglês
+
+✅RESPONDIDO: Não encontrei, pode me indicar com uma imagem?
+
+6- Se fosse possível só para deixar a elaboração de peças um pouco mais completa , seria possível adicionar além dos que já tem?
+-Recursos
+-Embargos
+-Manifestações
+-Contratos
+-Notificação extra judicial
+✅ IMPLEMENTADO: Adicionados os tipos de peças solicitados (Recursos, Embargos, Manifestações, Notificação Extra Judicial) ao Redator IA. O sistema agora detecta automaticamente o tipo de peça baseado no texto digitado. ITEM OPCIONAL IMPLEMENTADO: Criado um Índice de Valores de Mercado com minicards no topo da página do Redator IA, exibindo valores mínimo, médio e máximo para cada tipo de peça. O sistema atualiza automaticamente a cada 7 dias com variação de mercado, mostrando data da última atualização e próxima data de atualização. Botão para atualizar manualmente disponível a qualquer momento.
+
+
+OPCIONAL: seria possível a IA em algum lugar mostrar o valor aproximado da tabela da OAB para tais serviços ?
+✅ IMPLEMENTADO: Criado Índice de Valores de Mercado com minicards no topo da página do Redator IA, exibindo valores mínimo, médio e máximo para cada tipo de peça (Petição, Embargos, Recurso, Contestação, Manifestação, Notificação Extra Judicial, Procuração, Contrato). O sistema atualiza automaticamente a cada 7 dias com variação de mercado. Legenda discreta mostra última atualização e próxima data. Todos os valores deixam claro que são sugestões baseadas em pesquisas da IA, recomendando sempre consultar tabelas oficiais da OAB do estado.
+
+7- Mudar o termo "Tons de Voz" das peças, para "tons de personalidades"
+✅ RESPONDIDO: O termo "Tons de Voz" já foi alterado para "Tons de Personalidade" em toda a ferramenta Redator IA (RedatorIA.tsx e Dashboards.tsx). A mudança reflete melhor a natureza customizável e a diversidade de estilos de escrita oferecidos pela IA.
+
+8- ao criar um PDF o sistema está criando um PDF da pagina toda não só do documento, e se caso tiver outras formas de documento verificar se acontece o mesmo.
+✅ IMPLEMENTADO: Corrigido o botão PDF na ferramenta Redator IA. Agora gera PDF apenas com o conteúdo da minuta (título, documento e data de geração), sem incluir os elementos da página. Implementado usando iframe para isolamento total do conteúdo. Também foi removido o trecho de explicação/resposta que vinha no início do documento gerado pela IA ("Com certeza...", "Claro...", etc), deixando apenas o documento puro e pronto para uso. Alterações aplicadas em RedatorIA.tsx e Dashboards.tsx (ToolWriter).
+
+9- Sempre que sai de uma tela ao voltar o conteúdo não está mais lá, (lembro que seria visto se isso aconteceria com  o sistema já estando online.
+
+✅ IMPLEMENTADO: Implementada persistência de dados na ferramenta Redator IA (RedatorIA.tsx e ToolWriter). Agora todos os dados (configuração, minuta gerada, variações, análises, jurisprudência, força do argumento, conformidade) são salvos automaticamente em localStorage. Quando o usuário sai da ferramenta e volta, todo o conteúdo é restaurado. Adicionado botão "Limpar" para resetar manualmente quando desejado. A persistência funciona em ambos os componentes (standalone RedatorIA e ToolWriter dentro do Dashboards).
+
+10-em agenda novo compromisso/ Tipo, existem as seguintes opções, judicial, administrativo, interno, e diligencia, falta a opção EXTRA JUDICIAL
+
+✅ IMPLEMENTADO: Adicionada a opção "Extra Judicial" na ferramenta Agenda, no campo Tipo de Novo Compromisso. A alteração foi feita em três locais: Interface AgendaItem em types.ts, select do formulário em Dashboards.tsx (ToolAgenda), e função suggestDeadlines em geminiService.ts. A opção agora aparece no dropdown junto com Judicial, Administrativo, Interno e Diligencia.
+
+11- coloquei o compromisso agendado para hoje, ao clicar em analisar, aparece a cima o aviso de um prazo vencido em 3 dias! Porque?
+
+✅ CORRIGIDO: O alerta de "Prazo Vencendo em 3 Dias" estava sendo exibido incorretamente para compromissos agendados para hoje. O problema estava na lógica de cálculo de dias (daysUntil >= 0), que incluía o próprio dia. Alterado para daysUntil > 0 em dois locais: no useEffect que gera upcomingAlerts (linha 1722) e no indicador visual de urgência dos itens de agenda (linha 2056). Agora apenas compromissos com 1 a 3 dias até a data são marcados como urgentes, excluindo compromissos de hoje.
+
+12- O resumo semanal aparece todo em inglês.
+
+✅ CORRIGIDO: O resumo semanal/mensal estava sendo gerado em inglês porque o prompt da função generateAgendaSummary em geminiService.ts estava completamente em inglês. Traduzido todo o prompt para português (Brazil), incluindo instruções e rótulos. A estrutura JSON e lógica de processamento mantiveram-se inalteradas. Agora o resumo estratégico de agenda, análise de carga de trabalho e recomendações aparecem totalmente em português.
+
+13- Nas notificações que aparecem para o cliente Por exemplo: O Dr. XXXX manifestou interesse no seu caso, deve constar também a seguinte informação " vá ate a aba painel" porque assim como no ítem 4 acima para os advogados, também automaticamente se imagina que clicando na notificação você já será enviado para realizar aquela ação, oque seria muito bom também como mencionado no item 4, nas notificações, a mesma coisa, deveria constar a expressão "Vá até meus casos para responder" ou habilitar a ação ao clicar em cima da notificação.
+
+✅ IMPLEMENTADO: A mensagem de notificação para clientes agora inclui instrução clara: "O Dr(a). [Nome] manifestou interesse no seu caso. Vá até Meus Casos para responder." Quando o cliente clica na notificação, o sistema automaticamente abre a aba "Meus Casos" para que ele responda ao interesse manifestado pelo advogado. Implementação mantém consistência com o item 4 (notificações para advogados).
+
+14-  Quando entrei em CRM KYCe cliquei em um cliente cadastrado apareceu o dossie do cliente :
+1- oque é e para que serve o atualizar IA
+✅ RESPONDIDO: O botão "Atualizar IA" gera uma recomendação estratégica automática baseada no perfil do cliente (risk score, status, segmento e histórico de casos). Ao clicar, a IA analisa o cliente e sugere a próxima ação recomendada para engajamento ou retenção (ex: "Realizar follow-up prioritário" ou "Oferecer novo serviço"). É uma ferramenta para ajudar o advogado a definir estratégia de abordagem do cliente.
+
+2-Ele está dando erro ao gerar relatório clicando em gerar relatório
+✅ CORRIGIDO: O erro ao gerar relatório estava na sintaxe incorreta da chamada API Gemini. A função `generateClientReport` em `geminiService.ts` (linha 1012) estava enviando `contents: prompt` quando deveria ser `contents: [{ text: prompt }]` (array com objeto de texto). Corrigido o formato de envio para a API. Agora gera relatório executivo do cliente corretamente.
+
+3-como funciona o chat IA ? Eu coloquei uma pergunta sobre o cliente e cliquei no simbolo de enviar e deu " ERRO AO PROCESSAR SOLICITAÇÃO "    
+✅ CORRIGIDO: O erro ao enviar mensagens no chat IA tinha a mesma causa - sintaxe incorreta na API Gemini. A função `chatWithClientAI` em `geminiService.ts` (linha 952) usava `contents: prompt` quando deveria ser `contents: [{ text: prompt }]`. Corrigido em geminiService.ts. Agora o chat IA processa perguntas sobre o cliente normalmente, mantendo histórico de conversa e contexto do perfil do cliente.
+
+
+15- O campo : Como funciona na prática? Esta com informação errada:
+informação que está errada:
+Clientes Reais e Comprometidos
+Como os clientes pagam para publicar, você tem acesso a demandas reais e sérias, sem perder tempo com spam.
+
+✅ CORRIGIDO: O texto da seção "Clientes Reais e Comprometidos" (na página Landing, item 2 para advogados) estava citando que "clientes pagam para publicar", o que é incorreto. Alterado de: "Como os clientes pagam para publicar, você tem acesso a demandas reais e sérias, sem perder tempo com spam." Para: "Você tem acesso apenas a demandas reais e sérias de clientes genuínos interessados em resolver seus problemas jurídicos, sem perder tempo com spam." A alteração foi feita em Landing.tsx (linha 262), mantendo o contexto de qualidade/seriedade sem mencionar pagamento.
+
+16-  Não sei se felizmente, ou infelizmente, não consigo abrir mão da identificação do grupo do facebook na ferramenta, a baixo do nome SOCIALJURIDICO gostaria  ainda que constasse com a logo do grupo com a seguinte informação DO GRUPO PRECISO DE UM ADVOGADO DO FACEBOOK
+
+17-Para adicionar o banner /anuncio eu consigo fazer pelo adm ou tenho que pedir para você fazer? O banner terá um link?

@@ -259,7 +259,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
                         <div className="relative pl-12">
                             <div className="absolute left-0 top-0 w-8 h-8 bg-white border-2 border-indigo-600 rounded-full flex items-center justify-center font-bold text-indigo-600 z-10">2</div>
                             <h4 className="text-lg font-bold text-slate-900">Clientes Reais e Comprometidos</h4>
-                            <p className="text-slate-600 mt-2">Como os clientes pagam para publicar, você tem acesso a demandas reais e sérias, sem perder tempo com spam.</p>
+                            <p className="text-slate-600 mt-2">Você tem acesso apenas a demandas reais e sérias de clientes genuínos interessados em resolver seus problemas jurídicos, sem perder tempo com spam.</p>
                         </div>
                         <div className="relative pl-12">
                             <div className="absolute left-0 top-0 w-8 h-8 bg-white border-2 border-indigo-600 rounded-full flex items-center justify-center font-bold text-indigo-600 z-10">3</div>
@@ -582,6 +582,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
                 <ul className="space-y-3 text-sm">
                     <li><a href="/terms.html" className="hover:text-indigo-400 transition">Termos de Uso</a></li>
                     <li><a href="/privacy.html" className="hover:text-indigo-400 transition">Política de Privacidade</a></li>
+                    <li><a href="/data-deletion" className="hover:text-indigo-400 transition">Exclusão de Dados</a></li>
                     <li><a href="#" className="hover:text-indigo-400 transition">Compliance</a></li>
                     <li className="pt-4">
                         <button 

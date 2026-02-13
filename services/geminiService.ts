@@ -136,19 +136,44 @@ export const searchJurisprudence = async (query: string) => {
 // Tool 3: Draft Creator - ENHANCED
 export const generateLegalDraft = async (config: { type: string; clientName: string; facts: string; tone: string }) => {
     const ai = getAI();
-    const prompt = `Act as a senior Brazilian lawyer. Write a legal document of type "${config.type}".
-  Client: ${config.clientName}.
-  Facts: ${config.facts}.
-  Tone: ${config.tone}.
-  Structure: Header, Facts, Law, Requests, Footer.
-  Language: Portuguese (Brazil).
-  Format: Markdown.`;
+    const prompt = `Act as a senior Brazilian lawyer. Write ONLY a legal document of type "${config.type}". 
+DO NOT include any introduction, explanation, or narrative before the document. Start directly with the document content.
+
+Client: ${config.clientName}
+Facts: ${config.facts}
+Tone: ${config.tone}
+Structure: Header, Facts, Law, Requests, Footer
+Language: Portuguese (Brazil)
+Format: Plain text (NO markdown formatting, NO backticks, NO code blocks)
+
+Generate ONLY the document content. Nothing else.`;
 
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt
     });
-    return response.text || "Erro ao gerar minuta.";
+    
+    let text = response.text || "Erro ao gerar minuta.";
+    
+    // Remover markdown backticks se presentes
+    text = text.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+    
+    // Remover explicações comuns do início
+    const explanationPatterns = [
+        /^.*?Com certeza.*?\n---\n/is,
+        /^.*?Claro.*?\n---\n/is,
+        /^.*?Com prazer.*?\n---\n/is,
+        /^.*?Segue.*?\n---\n/is,
+    ];
+    
+    for (const pattern of explanationPatterns) {
+        if (pattern.test(text)) {
+            text = text.replace(pattern, '');
+            break;
+        }
+    }
+    
+    return text;
 };
 
 // ===== REDATOR IA PROFESSIONAL ENHANCEMENTS =====
@@ -891,7 +916,7 @@ export const generateNextAction = async (clientData: any, caseHistory: string[])
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: prompt
+            contents: [{ text: prompt }]
         });
         return response.text?.trim() || 'Realizar follow-up com cliente';
     } catch (e) {
@@ -925,7 +950,7 @@ export const chatWithClientAI = async (clientData: any, userMessage: string, con
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: prompt
+            contents: [{ text: prompt }]
         });
         return response.text?.trim() || 'Não consegui processar sua pergunta.';
     } catch (e) {
@@ -985,7 +1010,7 @@ export const generateClientReport = async (clientData: any, caseHistory: string[
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: prompt
+            contents: [{ text: prompt }]
         });
         return response.text?.trim() || 'Não foi possível gerar relatório.';
     } catch (e) {
@@ -1362,7 +1387,7 @@ Be precise. Extract actual values, not templates.`,
 // ===== AGENDA PRO ENHANCEMENTS =====
 
 // Tool 6: Smart Agenda - Sugestão de Prazos
-export const suggestDeadlines = async (eventTitle: string, eventDescription: string, eventType: 'Judicial' | 'Administrativo' | 'Interno' | 'Diligencia'): Promise<{
+export const suggestDeadlines = async (eventTitle: string, eventDescription: string, eventType: 'Judicial' | 'Administrativo' | 'Interno' | 'Diligencia' | 'Extra Judicial'): Promise<{
     suggestedDate: string;
     reasoning: string;
     preparationDays: number;
@@ -1566,16 +1591,16 @@ export const generateAgendaSummary = async (events: Array<{ title: string, date:
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: `Generate a strategic agenda summary for a lawyer.
+            contents: `Gere um resumo estratégico de agenda para um advogado.
 
-Period: ${period}
-Events: ${JSON.stringify(events)}
+Período: ${period === 'semanal' ? 'Semanal' : 'Mensal'}
+Compromissos: ${JSON.stringify(events)}
 
-Return JSON with:
-1. summary: Executive overview of the period
-2. keyEvents: Most important events
-3. workloadAnalysis: Assessment of workload and stress
-4. recommendations: How to optimize the schedule`,
+Retorne JSON com:
+1. summary: Visão geral executiva do período
+2. keyEvents: Eventos mais importantes
+3. workloadAnalysis: Avaliação da carga de trabalho e estresse
+4. recommendations: Como otimizar a agenda`,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {

@@ -8,6 +8,7 @@ import { Chat } from './Chat';
 import ClickCounter from './ClickCounter';
 import { useClickLimit } from '../hooks/useClickLimit';
 import ClickLimitModal from './ClickLimitModal';
+import MarketPricesIndex from './MarketPricesIndex';
 import bannerTeste from '../img/banner_teste.png';
 import { analyzeCaseDescription, calculateCasePrice, autoTagDocument, searchJurisprudence, generateLegalDraft, analyzeCRMRisk, diagnoseIntake, calculateLegalMath, generateClientProfile, generateNextAction, chatWithClientAI, generateClientTags, generateClientReport, suggestDeadlines, generatePreparationChecklist, analyzeAgendaConflicts, generateAgendaSummary, generateIntakeQuestions, estimateCaseValue, analyzeViability } from '../services/geminiService';
 import { calculateRescisaoCompleta, calculateFerias, calculateHorasExtras, calculateCorrecaoMonetaria, calculateJurosMoratorios, calculateAposentadoriaIdade, calculateSELIC, calculatePensaoAlimenticia, calculateHonorarios, calculatePrazoCPC } from '../services/calculatorsService';
@@ -184,7 +185,12 @@ const NotificationList: React.FC = () => {
                         </div>
                     ) : (
                         myNotifications.map(n => (
-                            <div key={n.id} onClick={() => markNotificationAsRead(n.id)} className={`p-6 flex items-start space-x-4 hover:bg-slate-50 transition cursor-pointer ${!n.read ? 'bg-indigo-50/50' : ''}`}>
+                            <div key={n.id} onClick={() => {
+                                markNotificationAsRead(n.id);
+                                if (n.title === 'Proposta Aceita!' || n.message.includes('manifestou interesse')) {
+                                    setView('my-cases');
+                                }
+                            }} className={`p-6 flex items-start space-x-4 hover:bg-slate-50 transition cursor-pointer ${!n.read ? 'bg-indigo-50/50' : ''}`}>
                                 <div className={`mt-1 p-2 rounded-full flex-shrink-0 ${n.type === 'success' ? 'bg-green-100 text-green-600' :
                                     n.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
                                         'bg-blue-100 text-blue-600'
@@ -1397,11 +1403,33 @@ Relevância: ${result.relevance}%`
 
 const ToolWriter: React.FC = () => {
     const { crmClients, addSmartDoc } = useApp();
-    const [config, setConfig] = useState({ type: 'Peticao Inicial', clientName: '', facts: '', tone: 'Formal' });
-    const [result, setResult] = useState('');
+    
+    // Carregar estado persistido do localStorage
+    const loadPersistedState = () => {
+        try {
+            const saved = localStorage.getItem('toolWriter_state');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('Erro ao carregar estado persistido:', e);
+        }
+        return null;
+    };
+
+    const persistedState = loadPersistedState();
+
+    const [config, setConfig] = useState(persistedState?.config || { type: 'Peticao Inicial', clientName: '', facts: '', tone: 'Formal' });
+    const [result, setResult] = useState(persistedState?.result || '');
     const [loading, setLoading] = useState(false);
     const [savingToSmartDocs, setSavingToSmartDocs] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+
+    // Salvar estado no localStorage sempre que muda
+    useEffect(() => {
+        const stateToSave = { config, result };
+        localStorage.setItem('toolWriter_state', JSON.stringify(stateToSave));
+    }, [config, result]);
 
     const handleGenerate = async () => {
         setLoading(true);
@@ -1433,6 +1461,75 @@ const ToolWriter: React.FC = () => {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+    };
+
+    const handleExportPDF = () => {
+        if (!result) return;
+
+        // Criar iframe para impressão
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframeDoc) return;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>${config.type}</title>
+                <style>
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        font-size: 12px;
+                        line-height: 1.8;
+                        color: #000;
+                        margin: 20px;
+                        padding: 0;
+                    }
+                    h2 {
+                        text-align: center;
+                        font-size: 16px;
+                        font-weight: bold;
+                        margin-bottom: 30px;
+                    }
+                    .content {
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                        text-align: justify;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        text-align: right;
+                        font-size: 10px;
+                        color: #666;
+                    }
+                </style>
+            </head>
+            <body>
+                <h2>${config.type}</h2>
+                <div class="content">${result}</div>
+                <div class="footer">
+                    <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+
+        // Aguardar o iframe carregar antes de imprimir
+        iframe.onload = () => {
+            iframe.contentWindow?.print();
+            // Remover iframe após um tempo
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        };
     };
 
     const handleSaveToSmartDocs = async () => {
@@ -1476,27 +1573,30 @@ const ToolWriter: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
-            {/* FERRAMENTA DESCRIPTION CARD */}
-            <div className="bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 rounded-2xl p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-rose-100 rounded-xl flex-shrink-0">
-                        <PenTool className="w-6 h-6 text-rose-600" />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 mb-2">O que você pode fazer:</h3>
-                        <p className="text-slate-700 text-sm leading-relaxed mb-3">
-                            Gere minutas jurídicas completas com um clique usando inteligência artificial. Configure tipo de peça, tom de voz, dados do cliente (puxados do CRM) e descrição dos fatos. Sistema gera peça profissional, estruturada e pronta para uso. Economize horas de redação.
-                        </p>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">✍️ Geração IA</span>
-                            <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">🎯 Múltiplos Tipos</span>
-                            <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">🗣️ Tom Customizável</span>
-                            <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">⚡ Instantâneo</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+         <div className="space-y-6">
+             {/* Índice de Preços de Mercado - Importar MarketPricesIndex */}
+             <MarketPricesIndex />
+
+             {/* FERRAMENTA DESCRIPTION CARD */}
+             <div className="bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 rounded-2xl p-6 shadow-sm">
+                 <div className="flex items-start gap-4">
+                     <div className="p-3 bg-rose-100 rounded-xl flex-shrink-0">
+                         <PenTool className="w-6 h-6 text-rose-600" />
+                     </div>
+                     <div className="flex-1">
+                         <h3 className="font-bold text-slate-900 mb-2">O que você pode fazer:</h3>
+                         <p className="text-slate-700 text-sm leading-relaxed mb-3">
+                             Gere minutas jurídicas completas com um clique usando inteligência artificial. Configure tipo de peça, tom de voz, dados do cliente (puxados do CRM) e descrição dos fatos. Sistema gera peça profissional, estruturada e pronta para uso. Economize horas de redação.
+                         </p>
+                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                             <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">✍️ Geração IA</span>
+                             <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">🎯 Múltiplos Tipos</span>
+                             <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">🗣️ Tom Customizável</span>
+                             <span className="text-xs bg-white px-2.5 py-1.5 rounded-lg text-rose-700 font-bold border border-rose-200">⚡ Instantâneo</span>
+                         </div>
+                     </div>
+                 </div>
+             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[calc(100vh-240px)]">
             <div className="bg-white p-6 rounded-2xl border border-slate-200 overflow-y-auto">
@@ -1509,6 +1609,11 @@ const ToolWriter: React.FC = () => {
                             <option>Contestação</option>
                             <option>Contrato de Honorários</option>
                             <option>Procuração</option>
+                            <option>Parecer Jurídico</option>
+                            <option>Recurso</option>
+                            <option>Embargos</option>
+                            <option>Manifestação</option>
+                            <option>Notificação Extrajudicial</option>
                         </select>
                     </div>
                     <div>
@@ -1547,7 +1652,7 @@ const ToolWriter: React.FC = () => {
                             <button onClick={handleCopy} className="bg-slate-600 text-white py-2 px-3 rounded-lg font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 text-xs">
                                 <Copy className="w-4 h-4" /> Copiar
                             </button>
-                            <button onClick={() => window.print()} className="bg-slate-600 text-white py-2 px-3 rounded-lg font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 text-xs">
+                            <button onClick={handleExportPDF} className="bg-slate-600 text-white py-2 px-3 rounded-lg font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 text-xs">
                                 <Printer className="w-4 h-4" /> PDF
                             </button>
                             <button onClick={handleExportTxt} className="bg-slate-600 text-white py-2 px-3 rounded-lg font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2 text-xs">
@@ -1613,8 +1718,8 @@ const ToolAgenda: React.FC = () => {
             
             const daysUntil = Math.ceil((itemDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             
-            // Mostrar alerta se faltam 3 dias ou menos E ainda não venceu
-            return daysUntil <= 3 && daysUntil >= 0 && item.status !== 'DONE';
+            // Mostrar alerta se faltam 1 a 3 dias (excluir hoje e datas passadas)
+            return daysUntil <= 3 && daysUntil > 0 && item.status !== 'DONE';
         });
 
         setUpcomingAlerts(alerts);
@@ -1948,7 +2053,7 @@ const ToolAgenda: React.FC = () => {
                             {groupedItems[col as keyof typeof groupedItems].map(item => {
                                  const clientName = crmClients.find(c => c.id === item.clientId)?.name;
                                  const daysUntil = Math.ceil((new Date(item.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                                 const isUrgent = daysUntil <= 3 && daysUntil >= 0;
+                                 const isUrgent = daysUntil <= 3 && daysUntil > 0;
                                  
                                  return (
                                      <div key={item.id} className={`bg-white p-4 rounded-lg shadow-sm border-l-4 hover:shadow-md transition ${isUrgent ? 'border-red-500 bg-red-50' : 'border-indigo-500'}`}>
@@ -2010,14 +2115,15 @@ const ToolAgenda: React.FC = () => {
                                     <textarea value={newItem.description} onChange={e => setNewItem({ ...newItem, description: e.target.value })} className="w-full p-3 border border-slate-200 rounded-lg h-20 resize-none text-sm" placeholder="Descreva o compromisso, contexto, área jurídica..." />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase">Tipo</label>
-                                    <select value={newItem.type} onChange={e => setNewItem({ ...newItem, type: e.target.value as any })} className="w-full p-3 border border-slate-200 rounded-lg text-sm">
-                                        <option>Judicial</option>
-                                        <option>Administrativo</option>
-                                        <option>Interno</option>
-                                        <option>Diligencia</option>
-                                    </select>
-                                </div>
+                                     <label className="text-xs font-bold text-slate-500 uppercase">Tipo</label>
+                                     <select value={newItem.type} onChange={e => setNewItem({ ...newItem, type: e.target.value as any })} className="w-full p-3 border border-slate-200 rounded-lg text-sm">
+                                         <option>Judicial</option>
+                                         <option>Administrativo</option>
+                                         <option>Interno</option>
+                                         <option>Diligencia</option>
+                                         <option>Extra Judicial</option>
+                                     </select>
+                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase">Urgência</label>
                                     <select value={newItem.urgency} onChange={e => setNewItem({ ...newItem, urgency: e.target.value as any })} className="w-full p-3 border border-slate-200 rounded-lg text-sm">
@@ -3378,17 +3484,28 @@ export const LawyerDashboard: React.FC = () => {
         fetchInterestedCases();
     }, [currentUser?.id]);
 
+    // Normalizar termos jurídicos duplicados
+    const normalizeArea = (area: string) => {
+       if (!area) return '';
+       const normalized = area.toLowerCase()
+           .replace(/direito\s+(?:do\s+)?trabalho|direito\s+trabalhista/gi, 'trabalho')
+           .replace(/direito\s+(?:da\s+)?família|direito\s+familiarista/gi, 'família')
+           .replace(/direito\s+(?:do\s+)?consumidor|direito\s+consumerista/gi, 'consumidor');
+       return normalized;
+    };
+
     const availableCases = cases.filter(c => {
        if (c.status !== 'OPEN') return false;
        if (!searchKeyword) return true;
-       const keyword = searchKeyword.toLowerCase();
+       const keyword = normalizeArea(searchKeyword);
+       const normalizedArea = normalizeArea(c.area || '');
        return (
-           c.area?.toLowerCase().includes(keyword) ||
-           c.title?.toLowerCase().includes(keyword) ||
-           c.description?.toLowerCase().includes(keyword) ||
-           c.city?.toLowerCase().includes(keyword) ||
-           c.uf?.toLowerCase().includes(keyword) ||
-           c.complexity?.toLowerCase().includes(keyword)
+           normalizedArea.includes(keyword) ||
+           c.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+           c.description?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+           c.city?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+           c.uf?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+           c.complexity?.toLowerCase().includes(searchKeyword.toLowerCase())
        );
     });
     const myActiveCases = cases.filter(c =>
@@ -3974,6 +4091,7 @@ export const AdminDashboard: React.FC = () => {
                             <th className="p-4">Advogado</th>
                             <th className="p-4">OAB</th>
                             <th className="p-4">Email</th>
+                            <th className="p-4 text-center">Grupo Facebook</th>
                             <th className="p-4 text-center">Status Verificação</th>
                             <th className="p-4 text-center">Plano PRO</th>
                         </tr>
@@ -3989,6 +4107,11 @@ export const AdminDashboard: React.FC = () => {
                                 </td>
                                 <td className="p-4 font-mono text-slate-600">{lawyer.oab || 'N/A'}</td>
                                 <td className="p-4 text-slate-600">{lawyer.email}</td>
+                                <td className="p-4 text-center">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${lawyer.fromFacebookGroup ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        {lawyer.fromFacebookGroup ? '✓ Sim' : 'Não'}
+                                    </span>
+                                </td>
                                 <td className="p-4 text-center">
                                     <button
                                         onClick={() => toggleLawyerVerification(lawyer.id, !lawyer.verified)}

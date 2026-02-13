@@ -24,6 +24,7 @@ interface AppContextType {
   logout: () => Promise<void>;
   register: (user: Omit<User, 'id' | 'createdAt' | 'avatar'>, password?: string) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  updateUserProfile: (userId: string, data: Partial<User>) => Promise<void>;
   createCase: (data: { title: string; description: string; area: string; city: string; uf: string; price: number; complexity: string }) => Promise<void>;
   acceptCase: (caseId: string) => Promise<void>; // Manifestar Interesse com travamento de crédito
   hireLawyer: (caseId: string, lawyerId: string) => Promise<void>; // Nova função para o cliente escolher
@@ -219,7 +220,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           oab: data.oab || undefined,
           verified: data.verified || false,
           isPremium: data.is_premium || false,
-          balance: data.balance || 0
+          balance: data.balance || 0,
+          fromFacebookGroup: data.from_facebook_group || false
         });
       }
     } catch (error) {
@@ -233,7 +235,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setUsers(data.map((u: any) => ({ 
         ...u, 
         createdAt: u.created_at,
-        isPremium: u.is_premium || false
+        isPremium: u.is_premium || false,
+        fromFacebookGroup: u.from_facebook_group || false
       })));
     }
   };
@@ -603,6 +606,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (!error) { alert("Perfil atualizado!"); fetchUserProfile(currentUser.id); }
   };
 
+  const updateUserProfile = async (userId: string, data: Partial<User>) => {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.bio !== undefined) updateData.bio = data.bio;
+    if (data.oab !== undefined) updateData.oab = data.oab;
+    if (data.fromFacebookGroup !== undefined) updateData.from_facebook_group = data.fromFacebookGroup;
+
+    const { error } = await supabase.from('profiles').update(updateData).eq('id', userId);
+    if (!error) {
+      console.log('✅ updateUserProfile: Dados salvos com sucesso:', updateData);
+      setCurrentUser(prev => prev ? { ...prev, ...data } : null);
+      // Refrescar dados do usuário e lista global
+      setTimeout(() => {
+        fetchUserProfile(userId);
+        fetchUsers(); // Atualiza lista global para admin ver a mudança
+      }, 300);
+    } else {
+      console.error('❌ updateUserProfile: Erro ao salvar:', error);
+    }
+  };
+
   const createCase = async (data: { title: string; description: string; area: string; city: string; uf: string; price: number; complexity: string; images?: any[] | null }) => {
     if (!currentUser) return;
     const { data: newCase, error } = await supabase.from('cases').insert({
@@ -677,7 +702,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         supabase.from('notifications').insert({
           user_id: targetCase.clientId,
           title: 'Nova Proposta',
-          message: `O Dr(a). ${currentUser.name} manifestou interesse no seu caso.`,
+          message: `O Dr(a). ${currentUser.name} manifestou interesse no seu caso. Vá até Meus Casos para responder.`,
           type: 'success'
         });
       }
@@ -1019,7 +1044,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   return (
-    <AppContext.Provider value={{ currentUser, users, cases, notifications, crmClients, smartDocs, agendaItems, savedCalculations, clicksUsed, clicksLimit, clicksResetDate, recordClick, login, logout, register, updateProfile, createCase, acceptCase, hireLawyer, openChatWithLawyer, sendMessage, toggleLawyerVerification, closeCase, rateOtherUser, markNotificationAsRead, buyJuris, subscribePremium, togglePremiumStatus, fetchCRMClients, addCRMClient, updateCRMClient, fetchSmartDocs, addSmartDoc, fetchAgendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, fetchSavedCalculations, saveCalculation }}>
+    <AppContext.Provider value={{ currentUser, users, cases, notifications, crmClients, smartDocs, agendaItems, savedCalculations, clicksUsed, clicksLimit, clicksResetDate, recordClick, login, logout, register, updateProfile, updateUserProfile, createCase, acceptCase, hireLawyer, openChatWithLawyer, sendMessage, toggleLawyerVerification, closeCase, rateOtherUser, markNotificationAsRead, buyJuris, subscribePremium, togglePremiumStatus, fetchCRMClients, addCRMClient, updateCRMClient, fetchSmartDocs, addSmartDoc, fetchAgendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, fetchSavedCalculations, saveCalculation }}>
       {children}
     </AppContext.Provider>
   );

@@ -52,6 +52,53 @@ app.post('/api/auth/validate-google', async (req, res) => {
   }
 });
 
+// Login Facebook
+app.post('/api/auth/validate-facebook', async (req, res) => {
+  const { accessToken, userID, appId } = req.body;
+  try {
+    if (!accessToken || !userID || !appId) {
+      throw new Error('Parâmetros inválidos: accessToken, userID e appId são obrigatórios');
+    }
+
+    // Validar token contra Facebook Graph API
+    const response = await fetch(
+      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`
+    );
+
+    if (!response.ok) {
+      throw new Error('Token inválido ou expirado');
+    }
+
+    const facebookUser = await response.json();
+
+    // Verificar se o ID do token corresponde ao ID retornado
+    if (facebookUser.id !== userID) {
+      throw new Error('ID do usuário não corresponde ao token');
+    }
+
+    // Validar se existe email (obrigatório para o sistema)
+    if (!facebookUser.email) {
+      throw new Error('Email não disponível na conta Facebook');
+    }
+
+    res.json({
+      valid: true,
+      user: {
+        id: facebookUser.id,
+        email: facebookUser.email,
+        name: facebookUser.name,
+        picture: facebookUser.picture?.data?.url || '',
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Erro ao validar Facebook:', error.message);
+    res.status(400).json({ 
+      valid: false, 
+      error: error.message || 'Erro ao validar token Facebook' 
+    });
+  }
+});
+
 // Checkout de Créditos (Juris)
 app.post('/api/create-juris-checkout', async (req, res) => {
   const { userId, priceId, successUrl, cancelUrl } = req.body;
