@@ -222,12 +222,18 @@ const MainApp = () => {
 
   // Monitorar mudanças de rota via URL
   useEffect(() => {
-    const path = window.location.pathname;
-    if (path === '/data-deletion') {
-      setCurrentPage('data-deletion');
-    } else {
-      setCurrentPage('home');
-    }
+    const checkPath = () => {
+      const path = window.location.pathname;
+      if (path === '/data-deletion') {
+        setCurrentPage('data-deletion');
+      } else {
+        setCurrentPage('home');
+      }
+    };
+
+    checkPath();
+    window.addEventListener('popstate', checkPath);
+    return () => window.removeEventListener('popstate', checkPath);
   }, []);
 
   useEffect(() => {

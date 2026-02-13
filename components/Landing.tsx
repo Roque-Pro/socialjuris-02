@@ -582,7 +582,7 @@ export const Landing: React.FC<LandingProps> = ({ onAuth }) => {
                 <ul className="space-y-3 text-sm">
                     <li><a href="/terms.html" className="hover:text-indigo-400 transition">Termos de Uso</a></li>
                     <li><a href="/privacy.html" className="hover:text-indigo-400 transition">Política de Privacidade</a></li>
-                    <li><a href="/data-deletion" className="hover:text-indigo-400 transition">Exclusão de Dados</a></li>
+                    <li><a href="/data-deletion" onClick={(e) => { e.preventDefault(); window.location.href = '/data-deletion'; }} className="hover:text-indigo-400 transition">Exclusão de Dados</a></li>
                     <li><a href="#" className="hover:text-indigo-400 transition">Compliance</a></li>
                     <li className="pt-4">
                         <button 
