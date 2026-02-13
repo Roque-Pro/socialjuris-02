@@ -3,7 +3,6 @@ import { AppProvider, useApp } from './store';
 import { UserRole } from './types';
 import { Landing } from './components/Landing';
 import { ClientDashboard, LawyerDashboard, AdminDashboard } from './components/Dashboards';
-import { DataDeletionRequest } from './components/DataDeletionRequest';
 import { Loader2, Mail, Lock, User, Briefcase, ChevronRight } from 'lucide-react';
 import { GoogleLogin } from './components/GoogleLogin';
 import { FacebookLogin } from './components/FacebookLogin';
@@ -218,23 +217,6 @@ const MainApp = () => {
   const [authView, setAuthView] = useState<{ type: 'login' | 'register', role: UserRole } | null>(null);
   const [showFacebookModal, setShowFacebookModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState<string>('home');
-
-  // Monitorar mudanças de rota via URL
-  useEffect(() => {
-    const checkPath = () => {
-      const path = window.location.pathname;
-      if (path === '/data-deletion') {
-        setCurrentPage('data-deletion');
-      } else {
-        setCurrentPage('home');
-      }
-    };
-
-    checkPath();
-    window.addEventListener('popstate', checkPath);
-    return () => window.removeEventListener('popstate', checkPath);
-  }, []);
 
   useEffect(() => {
     // Mostrar modal em TODOS os logins para sempre alimentar o indicador
@@ -282,23 +264,6 @@ const MainApp = () => {
       });
     }
   };
-
-  // Se estiver na página de exclusão de dados
-  if (currentPage === 'data-deletion') {
-    return (
-      <>
-        <DataDeletionRequest />
-        <footer className="bg-slate-950 text-slate-400 py-8 border-t border-slate-900 text-center text-sm">
-          <div className="mb-2">
-            © 2024 <span className="text-indigo-300">Social</span><span className="text-violet-300">Jurídico</span> Tecnologia Jurídica Ltda. Todos os direitos reservados.
-          </div>
-          <div className="text-xs text-slate-500">
-            <a href="/" className="text-slate-400 hover:text-indigo-400 transition">← Voltar para Home</a>
-          </div>
-        </footer>
-      </>
-    );
-  }
 
   if (authView) {
     return (

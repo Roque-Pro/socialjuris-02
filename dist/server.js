@@ -470,6 +470,42 @@ app.post("/api/auth/validate-google", async (req, res) => {
     res.status(400).json({ valid: false, error: error.message });
   }
 });
+app.post("/api/auth/validate-facebook", async (req, res) => {
+  const { accessToken, userID, appId } = req.body;
+  try {
+    if (!accessToken || !userID || !appId) {
+      throw new Error("Par\xE2metros inv\xE1lidos: accessToken, userID e appId s\xE3o obrigat\xF3rios");
+    }
+    const response = await fetch(
+      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`
+    );
+    if (!response.ok) {
+      throw new Error("Token inv\xE1lido ou expirado");
+    }
+    const facebookUser = await response.json();
+    if (facebookUser.id !== userID) {
+      throw new Error("ID do usu\xE1rio n\xE3o corresponde ao token");
+    }
+    if (!facebookUser.email) {
+      throw new Error("Email n\xE3o dispon\xEDvel na conta Facebook");
+    }
+    res.json({
+      valid: true,
+      user: {
+        id: facebookUser.id,
+        email: facebookUser.email,
+        name: facebookUser.name,
+        picture: facebookUser.picture?.data?.url || ""
+      }
+    });
+  } catch (error) {
+    console.error("\u274C Erro ao validar Facebook:", error.message);
+    res.status(400).json({
+      valid: false,
+      error: error.message || "Erro ao validar token Facebook"
+    });
+  }
+});
 app.post("/api/create-juris-checkout", async (req, res) => {
   const { userId, priceId, successUrl, cancelUrl } = req.body;
   try {
