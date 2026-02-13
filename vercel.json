@@ -1,12 +1,21 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "^(?!.*\\.(html|css|js|json|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$).*$",
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(privacy|terms|data-deletion)",
+      "destination": "/$1.html"
+    },
+    {
+      "source": "/((?!\\.)(?!api\\/).)*",
       "destination": "/index.html"
     }
   ]
 }
+
 
