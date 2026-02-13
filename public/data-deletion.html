@@ -5,194 +5,465 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Exclusão de Dados - SocialJuris</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            line-height: 1.8;
+            color: #1f2937;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 30px 20px;
+        }
+        .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f9fafb;
+            background-color: white;
+            padding: 50px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 20px;
         }
         h1 {
             color: #1f2937;
-            border-bottom: 3px solid #4f46e5;
-            padding-bottom: 10px;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 1.1em;
+            margin-top: 10px;
         }
         h2 {
             color: #374151;
-            margin-top: 30px;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
+            font-size: 1.5em;
+            margin-top: 40px;
             margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-left: 4px solid #4f46e5;
+            padding-left: 15px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
+        h3 {
+            color: #4b5563;
+            font-size: 1.2em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
             color: #374151;
         }
-        input[type="email"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 5px;
-            font-family: inherit;
-            font-size: 14px;
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
         }
-        textarea {
-            resize: vertical;
-            min-height: 100px;
+        li {
+            margin-bottom: 12px;
+            line-height: 1.8;
         }
-        input[type="email"]:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        .info-box {
+            background: linear-gradient(135deg, #eef2ff 0%, #f0f4ff 100%);
+            border-left: 4px solid #4f46e5;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 6px;
         }
-        button {
+        .info-box strong {
+            color: #4f46e5;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef08a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 6px;
+            color: #92400e;
+        }
+        .warning-box strong {
+            color: #d97706;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .success-box {
+            background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
+            border-left: 4px solid #16a34a;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 6px;
+            color: #166534;
+        }
+        .contact-section {
+            background: #f3f4f6;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .contact-section h3 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        .email-link {
             background-color: #4f46e5;
             color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 15px;
             font-weight: 600;
             transition: background-color 0.3s;
         }
-        button:hover {
+        .email-link:hover {
             background-color: #4338ca;
         }
-        .info-box {
-            background-color: #f0f4ff;
-            border-left: 4px solid #4f46e5;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
+        .email-display {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #4f46e5;
+            word-break: break-all;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            margin: 15px 0;
+            border: 1px solid #e5e7eb;
+        }
+        .timeline {
+            margin: 30px 0;
+        }
+        .timeline-item {
+            display: flex;
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background-color: #4f46e5;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #4f46e5;
+        }
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 30px;
+            bottom: -25px;
+            width: 2px;
+            background-color: #4f46e5;
+        }
+        .timeline-content h4 {
+            margin: 0 0 8px 0;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .timeline-content p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.95em;
+        }
+        .faq-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            border-left: 4px solid #e5e7eb;
+        }
+        .faq-item:hover {
+            border-left-color: #4f46e5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .faq-question {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .faq-answer {
+            color: #6b7280;
+            line-height: 1.8;
+        }
+        .legal-notice {
+            background-color: #f0f9ff;
+            border-left: 4px solid #0284c7;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            color: #0c4a6e;
         }
         .back-link {
-            margin-top: 20px;
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
         }
         .back-link a {
             color: #4f46e5;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: color 0.3s;
         }
         .back-link a:hover {
+            color: #4338ca;
             text-decoration: underline;
         }
-        .success-message {
-            display: none;
-            background-color: #dcfce7;
-            border-left: 4px solid #16a34a;
-            padding: 15px;
-            border-radius: 4px;
-            color: #166534;
-            margin-bottom: 20px;
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
         }
-        .success-message.show {
-            display: block;
+        .step-box {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .step-box:hover {
+            border-color: #4f46e5;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+        }
+        .step-number {
+            display: inline-block;
+            background-color: #4f46e5;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: 700;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Solicitação de Exclusão de Dados</h1>
-        
-        <p><strong>Última atualização: 8 de fevereiro de 2026</strong></p>
+        <!-- HEADER -->
+        <div class="header">
+            <h1>Solicitação de Exclusão de Dados</h1>
+            <p class="subtitle">Direito de Privacidade conforme LGPD (Lei Geral de Proteção de Dados)</p>
+            <p><strong>Última atualização: 13 de fevereiro de 2026</strong></p>
+        </div>
 
+        <!-- INFORMAÇÃO PRINCIPAL -->
         <div class="info-box">
-            <strong>Direito de Privacidade:</strong> Você tem o direito de solicitar a exclusão de seus dados pessoais. Após confirmação de sua identidade, procederemos com a exclusão conforme exigido pela LGPD.
+            <strong>Seu Direito à Privacidade</strong>
+            <p>A SocialJuris respeita completamente o seu direito de solicitar a exclusão de seus dados pessoais. Conforme a Lei Geral de Proteção de Dados (LGPD) e outras regulamentações de privacidade internacionais, você tem o <span class="highlight">direito absoluto de solicitar que seus dados sejam removidos de nossos sistemas</span>.</p>
         </div>
 
-        <div class="success-message" id="successMessage">
-            Sua solicitação foi enviada com sucesso! Você receberá uma confirmação por email em breve.
-        </div>
-
-        <h2>Como funciona</h2>
+        <!-- O QUE É COLETADO -->
+        <h2>Que Dados Coletamos e Mantemos</h2>
+        <p>Para melhor entender o que será excluído, veja abaixo os tipos de dados que coletamos e armazenamos:</p>
         <ul>
-            <li>Preencha o formulário abaixo com seu email registrado</li>
-            <li>Confirme sua solicitação através do email que você receberá</li>
-            <li>Seus dados serão permanentemente excluídos em até 30 dias</li>
-            <li>Você receberá uma confirmação final da exclusão</li>
+            <li><strong>Dados de Conta:</strong> Nome completo, email, senha criptografada, avatar/foto de perfil</li>
+            <li><strong>Dados de Perfil Profissional:</strong> Registro OAB (para advogados), especialidades, descrição profissional, número de celular</li>
+            <li><strong>Dados de Uso:</strong> Histórico de acessos, páginas visitadas, ações realizadas na plataforma</li>
+            <li><strong>Dados de Autenticação Social:</strong> ID do Google, ID do Facebook (apenas se você fez login via redes sociais)</li>
+            <li><strong>Dados de Pagamento:</strong> Informações de transações processadas pela Stripe (histórico de pagamentos)</li>
+            <li><strong>Dados de Interação:</strong> Casos criados, documentos enviados, mensagens trocadas com clientes</li>
+            <li><strong>Dados de Grupo Facebook:</strong> Informações sobre sua participação em grupos vinculados (se aplicável)</li>
         </ul>
 
-        <h2>Formulário de Solicitação</h2>
+        <!-- COMO FUNCIONA O PROCESSO -->
+        <h2>Como Funciona o Processo de Exclusão</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h4>Passo 1: Enviar Solicitação</h4>
+                    <p>Você envia sua solicitação de exclusão através de um email para matrixinformatica@gmail.com, fornecendo o email associado à sua conta.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h4>Passo 2: Confirmação de Identidade</h4>
+                    <p>Você receberá um email de confirmação em <span class="highlight">matrixinformatica@gmail.com</span> com um link de verificação para confirmar que realmente deseja deletar seus dados.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h4>Passo 3: Processamento da Solicitação</h4>
+                    <p>Após a confirmação, nossa equipe processará sua solicitação. Todos os dados pessoais serão marcados para exclusão permanente dos nossos servidores.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h4>Passo 4: Exclusão Permanente</h4>
+                    <p>Dentro de até <span class="highlight">30 dias</span>, seus dados serão completamente removidos de todos os nossos sistemas, backups e arquivos.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h4>Passo 5: Confirmação Final</h4>
+                    <p>Você receberá um email de confirmação final informando que a exclusão foi completada com sucesso.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRAZO -->
+        <div class="success-box">
+            <strong>Prazo Garantido</strong>
+            <p>Comprometemo-nos a processar sua solicitação e excluir todos os seus dados em até <strong>30 dias úteis</strong> a partir da confirmação. Você receberá atualizações do status via email durante todo o processo.</p>
+        </div>
+
+        <!-- PASSOS PARA SOLICITAR -->
+        <h2>Como Solicitar a Exclusão de Seus Dados</h2>
+        <div class="step-box">
+            <span class="step-number">1</span>
+            <strong>Prepare seu Email</strong>
+            <p>Certifique-se de ter acesso ao email registrado em sua conta SocialJuris. É essencial que você possa receber a confirmação.</p>
+        </div>
+        <div class="step-box">
+            <span class="step-number">2</span>
+            <strong>Envie a Solicitação</strong>
+            <p>Envie um email para <strong>matrixinformatica@gmail.com</strong> com o seguinte título: <span class="highlight">"Solicitação de Exclusão de Dados Pessoais LGPD"</span></p>
+        </div>
+        <div class="step-box">
+            <span class="step-number">3</span>
+            <strong>Inclua as Informações Obrigatórias</strong>
+            <p>No corpo do email, inclua:</p>
+            <ul>
+                <li>Seu nome completo</li>
+                <li>Email registrado na conta SocialJuris</li>
+                <li>CPF ou CNPJ (para verificação de identidade)</li>
+                <li>Motivo da solicitação (opcional, mas ajuda)</li>
+            </ul>
+        </div>
+        <div class="step-box">
+            <span class="step-number">4</span>
+            <strong>Aguarde a Confirmação</strong>
+            <p>Você receberá um email de confirmação dentro de 24-48 horas. Clique no link de verificação fornecido.</p>
+        </div>
+        <div class="step-box">
+            <span class="step-number">5</span>
+            <strong>Dados Serão Excluídos</strong>
+            <p>Após confirmar, seus dados serão permanentemente removidos em até 30 dias. Você será notificado quando o processo estiver completo.</p>
+        </div>
+
+        <!-- CONTATO DIRETO -->
+        <div class="contact-section">
+            <h3>Entre em Contato Conosco</h3>
+            <p>Para solicitar a exclusão de seus dados, envie um email para:</p>
+            <div class="email-display">
+                matrixinformatica@gmail.com
+            </div>
+            <p style="color: #6b7280; margin-top: 15px;">
+                Responderemos sua solicitação dentro de 24 a 48 horas úteis.
+            </p>
+            <a href="mailto:matrixinformatica@gmail.com" class="email-link">
+                ✉️ Enviar Email de Solicitação
+            </a>
+        </div>
+
+        <!-- PERGUNTAS FREQUENTES -->
+        <h2>Perguntas Frequentes</h2>
         
-        <form id="deletionForm">
-            <div class="form-group">
-                <label for="email">Email da sua conta SocialJuris *</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="seu.email@exemplo.com"
-                    required
-                >
+        <div class="faq-item">
+            <div class="faq-question">❓ Quanto tempo leva para excluir meus dados?</div>
+            <div class="faq-answer">O processo completo leva até 30 dias úteis. Este prazo é garantido conforme as normas de proteção de dados. Você receberá atualizações por email durante o processo.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ Meus dados serão recuperáveis após a exclusão?</div>
+            <div class="faq-answer">Não. A exclusão é permanente e irreversível. Seus dados serão removidos de todos os servidores, backups automatizados e arquivos de armazenamento. Você não poderá recuperar sua conta ou dados após a exclusão.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ O que acontece com meus dados de pagamento/transações?</div>
+            <div class="faq-answer">Dados de transações podem ser retidos por um período limitado conforme exigências legais de auditoria fiscal e financeira. No entanto, todas as informações pessoais identificáveis serão excluídas. Informações técnicas de transações podem ser mantidas em forma anonimizada.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ Preciso ser cliente para solicitar exclusão?</div>
+            <div class="faq-answer">Não. Qualquer pessoa que tenha uma conta registrada na SocialJuris pode solicitar a exclusão de seus dados, independentemente de ter feito pagamentos ou não.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ Posso cancelar minha solicitação de exclusão?</div>
+            <div class="faq-answer">Sim, você pode cancelar sua solicitação a qualquer momento antes da exclusão ser finalizada. Envie um email para matrixinformatica@gmail.com informando que deseja cancelar. Mas uma vez excluído, não há volta.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ Meus dados serão vendidos ou compartilhados antes da exclusão?</div>
+            <div class="faq-answer">Absolutamente não. A SocialJuris nunca vende dados pessoais. Uma vez que você solicita exclusão, seus dados ficam imediatamente bloqueados contra qualquer processamento ou compartilhamento, até serem completamente removidos.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ E meus dados em grupos do Facebook vinculados?</div>
+            <div class="faq-answer">Dados relativos à sua participação em grupos Facebook integrados com a SocialJuris serão também excluídos de nossos sistemas. No entanto, o Facebook mantém seus próprios dados conforme suas políticas.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">❓ O que se eu perder o acesso ao meu email?</div>
+            <div class="faq-answer">Se você não conseguir acessar o email registrado, entre em contato com matrixinformatica@gmail.com explicando a situação. Nós verificaremos sua identidade através de outros meios (como informações de conta ou documento de identidade) e processaremos sua solicitação.</div>
+        </div>
+
+        <!-- AVISO LEGAL -->
+        <div class="warning-box">
+            <strong>⚠️ Atenção Importante</strong>
+            <p>A exclusão de seus dados é permanente e irreversível. Você perderá acesso a sua conta, histórico de casos, documentos e toda informação associada. Por favor, considere cuidadosamente antes de fazer esta solicitação. Se deseja apenas dar um tempo, considere desativar sua conta temporariamente ao invés de deletar permanentemente.</p>
+        </div>
+
+        <!-- INFORMAÇÕES LEGAIS -->
+        <h2>Base Legal</h2>
+        <div class="legal-notice">
+            <strong>Esta política de exclusão de dados é baseada em:</strong>
+            <ul>
+                <li><strong>LGPD (Lei 13.709/2018):</strong> Lei Geral de Proteção de Dados Pessoais do Brasil - Artigos 17 e 18</li>
+                <li><strong>GDPR (General Data Protection Regulation):</strong> Regulamento Geral sobre Proteção de Dados da União Europeia - Artigo 17 (Direito ao Esquecimento)</li>
+                <li><strong>CCPA (California Consumer Privacy Act):</strong> Lei de Proteção de Privacidade do Consumidor da Califórnia</li>
+                <li><strong>Código de Defesa do Consumidor:</strong> Artigos relacionados à proteção de dados e privacidade</li>
+            </ul>
+        </div>
+
+        <!-- SEÇÃO FINAL DE CONTATO -->
+        <div class="contact-section">
+            <h3>Ainda tem dúvidas?</h3>
+            <p>Nossa equipe de atendimento está à disposição para esclarecer qualquer dúvida sobre o processo de exclusão de dados. Envie um email com suas perguntas para:</p>
+            <div class="email-display">
+                matrixinformatica@gmail.com
             </div>
+            <p style="color: #6b7280; margin-top: 15px;">
+                Tempo de resposta: 24 a 48 horas úteis
+            </p>
+        </div>
 
-            <div class="form-group">
-                <label for="reason">Motivo da solicitação (opcional)</label>
-                <textarea 
-                    id="reason" 
-                    name="reason" 
-                    placeholder="Nos ajude a melhorar..."
-                ></textarea>
-            </div>
+        <!-- INFORMAÇÕES DE ATUALIZAÇÃO -->
+        <h2>Informações Adicionais</h2>
+        <p><strong>Última atualização desta página:</strong> 13 de fevereiro de 2026</p>
+        <p><strong>Próxima revisão:</strong> 13 de agosto de 2026</p>
+        <p>A SocialJuris se reserva o direito de atualizar esta política de exclusão de dados a qualquer momento para estar em conformidade com as novas leis e regulamentações de proteção de dados.</p>
 
-            <button type="submit">Enviar Solicitação de Exclusão</button>
-        </form>
-
-        <h2>Dúvidas?</h2>
-        <p>Se você tiver dúvidas sobre o processo de exclusão de dados, entre em contato conosco através do email de suporte ou consulte nossa <a href="/privacy.html">Política de Privacidade</a>.</p>
-
+        <!-- VOLTAR -->
         <div class="back-link">
-            <a href="/">← Voltar para Home</a>
+            <a href="/">← Voltar para Home</a> | 
+            <a href="/privacy.html" style="margin-left: 20px;">📋 Política de Privacidade</a> |
+            <a href="/terms.html" style="margin-left: 20px;">📜 Termos de Serviço</a>
         </div>
     </div>
-
-    <script>
-        document.getElementById('deletionForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const reason = document.getElementById('reason').value;
-            
-            try {
-                const response = await fetch('/api/request-data-deletion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        reason: reason
-                    })
-                });
-
-                if (response.ok) {
-                    document.getElementById('successMessage').classList.add('show');
-                    document.getElementById('deletionForm').reset();
-                    
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 3000);
-                } else {
-                    alert('Erro ao enviar solicitação. Por favor, tente novamente.');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao enviar solicitação. Por favor, tente novamente.');
-            }
-        });
-    </script>
 </body>
 </html>
