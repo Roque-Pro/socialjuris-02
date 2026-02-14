@@ -193,3 +193,12 @@ export interface SavedCalculation {
     savedToSmartDoc?: boolean; // Flag se foi salvo no SmartDoc
     smartDocId?: string; // ID do SmartDoc associado
 }
+
+// Admin: Banner Management
+export interface Banner {
+  id: string;
+  name: string; // 'banner_1' ou 'banner_2'
+  imageUrl: string;
+  linkUrl: string;
+  updatedAt: string;
+}

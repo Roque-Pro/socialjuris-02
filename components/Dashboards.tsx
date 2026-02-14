@@ -3460,7 +3460,7 @@ export const ClientDashboard: React.FC = () => {
 };
 
 export const LawyerDashboard: React.FC = () => {
-     const { currentUser, cases, acceptCase, logout, subscribePremium, buyJuris, notifications } = useApp();
+     const { currentUser, cases, acceptCase, logout, subscribePremium, buyJuris, notifications, banners, fetchBanners } = useApp();
      const { handleClick: recordClick, showLimitModal, setShowLimitModal } = useClickLimit();
      const [view, setView] = useState<ViewType>('market');
      const [selectedCase, setSelectedCase] = useState<Case | null>(null);
@@ -3470,6 +3470,12 @@ export const LawyerDashboard: React.FC = () => {
      const [showBuyModal, setShowBuyModal] = useState(false);
      const [interestedCaseIds, setInterestedCaseIds] = useState<Set<string>>(new Set());
      const [sidebarOpen, setSidebarOpen] = useState(false);
+
+     // Garantir que banners são carregados
+     useEffect(() => {
+         console.log('🔍 LawyerDashboard montado, buscando banners...');
+         fetchBanners();
+     }, []);
 
     // Buscar casos onde o advogado manifestou interesse
     useEffect(() => {
@@ -3695,14 +3701,21 @@ export const LawyerDashboard: React.FC = () => {
             case 'market':
                 return (
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-full mx-auto px-4 pt-8">
-                        {/* Banner Esquerdo */}
-                        <div className="hidden lg:flex flex-col">
-                            <a href="#" target="_blank" rel="noopener noreferrer" className="fixed hover:opacity-85 transition group" style={{top: '160px', left: 'calc(50% - 648px)', width: '280px'}}>
-                                <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-indigo-300 transition border border-slate-200 group-hover:border-indigo-400 h-[584px]">
-                                    <img src={bannerTeste} alt="Banner" className="w-full h-full object-cover" />
-                                </div>
-                            </a>
-                        </div>
+                         {/* Banner Esquerdo */}
+                         <div className="hidden lg:flex flex-col">
+                             {(() => {
+                                 console.log('🎯 Renderizando Banner 1. Total banners:', banners.length, 'Dados:', banners);
+                                 const banner1 = banners.find(b => b.name === 'banner_1');
+                                 console.log('✅ Banner 1 encontrado?', !!banner1, 'URL:', banner1?.imageUrl);
+                                 return (
+                                     <a href={banner1?.linkUrl || '#'} target="_blank" rel="noopener noreferrer" className="fixed hover:opacity-85 transition group" style={{top: '160px', left: 'calc(50% - 648px)', width: '280px'}}>
+                                         <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-indigo-300 transition border border-slate-200 group-hover:border-indigo-400 h-[584px]">
+                                             <img src={banner1?.imageUrl || bannerTeste} alt="Banner" className="w-full h-full object-cover" />
+                                         </div>
+                                     </a>
+                                 );
+                             })()}
+                         </div>
 
                         {/* Feed do Meio */}
                         <div className="lg:col-span-3">
@@ -3803,13 +3816,18 @@ export const LawyerDashboard: React.FC = () => {
                         </div>
 
                         {/* Banner Direito */}
-                        <div className="hidden lg:flex flex-col">
-                            <a href="#" target="_blank" rel="noopener noreferrer" className="fixed hover:opacity-85 transition group" style={{top: '160px', right: 'calc(50% - 898px)', width: '280px'}}>
-                                <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-purple-300 transition border border-slate-200 group-hover:border-indigo-400 h-[584px]">
-                                    <img src={bannerTeste} alt="Banner" className="w-full h-full object-cover" />
-                                </div>
-                            </a>
-                        </div>
+                         <div className="hidden lg:flex flex-col">
+                             {(() => {
+                                 const banner2 = banners.find(b => b.name === 'banner_2');
+                                 return (
+                                     <a href={banner2?.linkUrl || '#'} target="_blank" rel="noopener noreferrer" className="fixed hover:opacity-85 transition group" style={{top: '160px', right: 'calc(50% - 898px)', width: '280px'}}>
+                                         <div className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-purple-300 transition border border-slate-200 group-hover:border-indigo-400 h-[584px]">
+                                             <img src={banner2?.imageUrl || bannerTeste} alt="Banner" className="w-full h-full object-cover" />
+                                         </div>
+                                     </a>
+                                 );
+                             })()}
+                         </div>
                     </div>
                 );
             case 'my-cases':
@@ -4021,10 +4039,116 @@ export const LawyerDashboard: React.FC = () => {
 };
 
 export const AdminDashboard: React.FC = () => {
-    const { users, toggleLawyerVerification, togglePremiumStatus, logout } = useApp();
-    const lawyers = users.filter(u => u.role === UserRole.LAWYER);
-    const [searchTerm, setSearchTerm] = useState('');
-    const filteredLawyers = lawyers.filter(l => l.name.toLowerCase().includes(searchTerm.toLowerCase()));
+     const { users, toggleLawyerVerification, togglePremiumStatus, logout, banners, updateBanner } = useApp();
+     const lawyers = users.filter(u => u.role === UserRole.LAWYER);
+     const [searchTerm, setSearchTerm] = useState('');
+     const filteredLawyers = lawyers.filter(l => l.name.toLowerCase().includes(searchTerm.toLowerCase()));
+     
+     // Estado para upload de banners
+     const [banner1Image, setBanner1Image] = useState<string>('');
+     const [banner1Link, setBanner1Link] = useState<string>('');
+     const [banner2Image, setBanner2Image] = useState<string>('');
+     const [banner2Link, setBanner2Link] = useState<string>('');
+     const [savingBanner1, setSavingBanner1] = useState(false);
+     const [savingBanner2, setSavingBanner2] = useState(false);
+     
+     // Carregar dados dos banners ao montar
+     useEffect(() => {
+         const banner1 = banners.find(b => b.name === 'banner_1');
+         const banner2 = banners.find(b => b.name === 'banner_2');
+         
+         if (banner1) {
+             setBanner1Image(banner1.imageUrl);
+             setBanner1Link(banner1.linkUrl);
+         }
+         if (banner2) {
+             setBanner2Image(banner2.imageUrl);
+             setBanner2Link(banner2.linkUrl);
+         }
+     }, [banners]);
+     
+     // Upload de imagem para Supabase Storage
+     const uploadBannerImage = async (file: File, bannerName: string): Promise<string> => {
+         const fileName = `${bannerName}_${Date.now()}_${file.name}`;
+         const { data, error } = await supabase.storage
+             .from('banners')
+             .upload(fileName, file);
+         
+         if (error) throw error;
+         
+         // Gerar URL pública
+         const { data: publicUrl } = supabase.storage
+             .from('banners')
+             .getPublicUrl(fileName);
+         
+         return publicUrl.publicUrl;
+     };
+     
+     const handleBanner1ImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+         if (e.target.files && e.target.files[0]) {
+             const file = e.target.files[0];
+             try {
+                 setSavingBanner1(true);
+                 const imageUrl = await uploadBannerImage(file, 'banner_1');
+                 setBanner1Image(imageUrl);
+                 await updateBanner('banner_1', imageUrl, banner1Link);
+                 alert('Banner 1 atualizado com sucesso!');
+             } catch (error: any) {
+                 alert('Erro ao fazer upload: ' + error.message);
+             } finally {
+                 setSavingBanner1(false);
+             }
+         }
+     };
+     
+     const handleBanner1LinkChange = async () => {
+         if (!banner1Image) {
+             alert('Por favor, primeiro adicione uma imagem para o Banner 1');
+             return;
+         }
+         try {
+             setSavingBanner1(true);
+             await updateBanner('banner_1', banner1Image, banner1Link);
+             alert('Link do Banner 1 atualizado com sucesso!');
+         } catch (error: any) {
+             alert('Erro ao atualizar link: ' + error.message);
+         } finally {
+             setSavingBanner1(false);
+         }
+     };
+     
+     const handleBanner2ImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+         if (e.target.files && e.target.files[0]) {
+             const file = e.target.files[0];
+             try {
+                 setSavingBanner2(true);
+                 const imageUrl = await uploadBannerImage(file, 'banner_2');
+                 setBanner2Image(imageUrl);
+                 await updateBanner('banner_2', imageUrl, banner2Link);
+                 alert('Banner 2 atualizado com sucesso!');
+             } catch (error: any) {
+                 alert('Erro ao fazer upload: ' + error.message);
+             } finally {
+                 setSavingBanner2(false);
+             }
+         }
+     };
+     
+     const handleBanner2LinkChange = async () => {
+         if (!banner2Image) {
+             alert('Por favor, primeiro adicione uma imagem para o Banner 2');
+             return;
+         }
+         try {
+             setSavingBanner2(true);
+             await updateBanner('banner_2', banner2Image, banner2Link);
+             alert('Link do Banner 2 atualizado com sucesso!');
+         } catch (error: any) {
+             alert('Erro ao atualizar link: ' + error.message);
+         } finally {
+             setSavingBanner2(false);
+         }
+     };
 
     return (
         <div className="min-h-screen bg-slate-100 p-8 font-sans">
@@ -4047,6 +4171,138 @@ export const AdminDashboard: React.FC = () => {
                     </span>
                 </div>
             </header>
+
+            {/* Seção de Gerenciamento de Banners */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-12">
+                <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center">
+                    <Upload className="w-5 h-5 mr-2 text-indigo-600" />
+                    Gerenciamento de Banners
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Banner 1 */}
+                    <div className="border border-slate-200 rounded-xl p-6 bg-slate-50">
+                        <h3 className="font-bold text-slate-900 mb-4">Banner 1 (Esquerdo)</h3>
+                        
+                        {/* Preview da imagem */}
+                        <div className="mb-4 bg-white rounded-lg border-2 border-dashed border-slate-300 p-4 h-40 flex items-center justify-center overflow-hidden">
+                            {banner1Image ? (
+                                <img src={banner1Image} alt="Banner 1 Preview" className="max-h-full max-w-full object-cover rounded" />
+                            ) : (
+                                <div className="text-center text-slate-400">
+                                    <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">Nenhuma imagem</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Input de arquivo */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Foto do Banner</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleBanner1ImageChange}
+                                disabled={savingBanner1}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white disabled:opacity-50 cursor-pointer"
+                            />
+                        </div>
+                        
+                        {/* Input de link */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Link do Banner</label>
+                            <input
+                                type="text"
+                                placeholder="https://exemplo.com"
+                                value={banner1Link}
+                                onChange={(e) => setBanner1Link(e.target.value)}
+                                disabled={savingBanner1}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                            />
+                        </div>
+                        
+                        {/* Botão de salvar */}
+                        <button
+                            onClick={handleBanner1LinkChange}
+                            disabled={savingBanner1 || !banner1Image}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center"
+                        >
+                            {savingBanner1 ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    Salvando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Salvar Banner 1
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    
+                    {/* Banner 2 */}
+                    <div className="border border-slate-200 rounded-xl p-6 bg-slate-50">
+                        <h3 className="font-bold text-slate-900 mb-4">Banner 2 (Direito)</h3>
+                        
+                        {/* Preview da imagem */}
+                        <div className="mb-4 bg-white rounded-lg border-2 border-dashed border-slate-300 p-4 h-40 flex items-center justify-center overflow-hidden">
+                            {banner2Image ? (
+                                <img src={banner2Image} alt="Banner 2 Preview" className="max-h-full max-w-full object-cover rounded" />
+                            ) : (
+                                <div className="text-center text-slate-400">
+                                    <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">Nenhuma imagem</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Input de arquivo */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Foto do Banner</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleBanner2ImageChange}
+                                disabled={savingBanner2}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white disabled:opacity-50 cursor-pointer"
+                            />
+                        </div>
+                        
+                        {/* Input de link */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Link do Banner</label>
+                            <input
+                                type="text"
+                                placeholder="https://exemplo.com"
+                                value={banner2Link}
+                                onChange={(e) => setBanner2Link(e.target.value)}
+                                disabled={savingBanner2}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                            />
+                        </div>
+                        
+                        {/* Botão de salvar */}
+                        <button
+                            onClick={handleBanner2LinkChange}
+                            disabled={savingBanner2 || !banner2Image}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center"
+                        >
+                            {savingBanner2 ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    Salvando...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Salvar Banner 2
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Case, Message, UserRole, CaseStatus, Notification, CRMProfile, SmartDoc, AgendaItem, SavedCalculation } from './types';
+import { User, Case, Message, UserRole, CaseStatus, Notification, CRMProfile, SmartDoc, AgendaItem, SavedCalculation, Banner } from './types';
 import { supabase } from './services/supabaseClient';
 import { createJurisCheckoutSession, createSubscriptionCheckoutSession, redirectToCheckout } from './services/stripeCheckoutService';
 
@@ -13,6 +13,7 @@ interface AppContextType {
   smartDocs: SmartDoc[]; // Estado global de documentos
   agendaItems: AgendaItem[]; // Estado global da agenda
   savedCalculations: SavedCalculation[]; // Estado global de calculos
+  banners: Banner[]; // Estado global de banners
   
   // Click counter
   clicksUsed: number;
@@ -50,6 +51,10 @@ interface AppContextType {
   deleteAgendaItem: (id: string) => Promise<void>;
   fetchSavedCalculations: () => Promise<void>;
   saveCalculation: (calcData: Omit<SavedCalculation, 'id' | 'lawyerId' | 'createdAt'>) => Promise<void>;
+  
+  // Funções de Banners (Admin)
+  fetchBanners: () => Promise<void>;
+  updateBanner: (name: string, imageUrl: string, linkUrl: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -63,6 +68,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [smartDocs, setSmartDocs] = useState<SmartDoc[]>([]);
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [session, setSession] = useState<any>(null);
   
   // Click counter
@@ -150,6 +156,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       fetchUsers();
       fetchCases();
       fetchNotifications();
+      fetchBanners(); // Buscar banners para todos
       expireLockedCredits();
       
       if (currentUser.role === UserRole.LAWYER) {
@@ -189,6 +196,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
          })
          .on('postgres_changes', { event: '*', schema: 'public', table: 'saved_calculations' }, (payload) => {
             fetchSavedCalculations();
+         })
+         .on('postgres_changes', { event: '*', schema: 'public', table: 'admin_banners' }, (payload) => {
+            fetchBanners();
          })
          .subscribe();
 
@@ -1031,23 +1041,78 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const deleteAgendaItem = async (id: string) => {
-      if (!currentUser) return;
-      if (!confirm('Tem certeza que deseja deletar este compromisso?')) return;
-      
-      const { error } = await supabase.from('agenda_items').delete().eq('id', id).eq('lawyer_id', currentUser.id);
-      
-      if (error) alert("Erro ao deletar: " + error.message);
-      else {
-          alert("Compromisso deletado!");
-          fetchAgendaItems();
-      }
-  };
+       if (!currentUser) return;
+       if (!confirm('Tem certeza que deseja deletar este compromisso?')) return;
+       
+       const { error } = await supabase.from('agenda_items').delete().eq('id', id).eq('lawyer_id', currentUser.id);
+       
+       if (error) alert("Erro ao deletar: " + error.message);
+       else {
+           alert("Compromisso deletado!");
+           fetchAgendaItems();
+       }
+   };
 
-  return (
-    <AppContext.Provider value={{ currentUser, users, cases, notifications, crmClients, smartDocs, agendaItems, savedCalculations, clicksUsed, clicksLimit, clicksResetDate, recordClick, login, logout, register, updateProfile, updateUserProfile, createCase, acceptCase, hireLawyer, openChatWithLawyer, sendMessage, toggleLawyerVerification, closeCase, rateOtherUser, markNotificationAsRead, buyJuris, subscribePremium, togglePremiumStatus, fetchCRMClients, addCRMClient, updateCRMClient, fetchSmartDocs, addSmartDoc, fetchAgendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, fetchSavedCalculations, saveCalculation }}>
-      {children}
-    </AppContext.Provider>
-  );
+   // Funções de Banners (Admin)
+   const fetchBanners = async () => {
+       try {
+           const { data, error } = await supabase.from('admin_banners').select('*');
+           console.log('🎨 BANNERS CARREGADOS DO BD:', data);
+           if (error) throw error;
+           
+           // Converter snake_case para camelCase
+           const bannersFormatted = (data || []).map((b: any) => ({
+               id: b.id,
+               name: b.name,
+               imageUrl: b.image_url,
+               linkUrl: b.link_url,
+               updatedAt: b.updated_at
+           }));
+           
+           console.log('✅ BANNERS FORMATADOS:', bannersFormatted);
+           setBanners(bannersFormatted);
+       } catch (error: any) {
+           console.error('❌ Erro ao buscar banners:', error.message);
+       }
+   };
+
+   const updateBanner = async (name: string, imageUrl: string, linkUrl: string) => {
+       try {
+           // Tentar atualizar se já existe
+           const { data: existing } = await supabase.from('admin_banners').select('id').eq('name', name).single();
+           
+           if (existing) {
+               const { error } = await supabase.from('admin_banners').update({
+                   image_url: imageUrl,
+                   link_url: linkUrl,
+                   updated_at: new Date().toISOString()
+               }).eq('name', name);
+               
+               if (error) throw error;
+           } else {
+               // Criar novo banner se não existe
+               const { error } = await supabase.from('admin_banners').insert({
+                   name,
+                   image_url: imageUrl,
+                   link_url: linkUrl,
+                   updated_at: new Date().toISOString()
+               });
+               
+               if (error) throw error;
+           }
+           
+           await fetchBanners();
+       } catch (error: any) {
+           console.error('Erro ao atualizar banner:', error.message);
+           throw error;
+       }
+   };
+
+   return (
+     <AppContext.Provider value={{ currentUser, users, cases, notifications, crmClients, smartDocs, agendaItems, savedCalculations, banners, clicksUsed, clicksLimit, clicksResetDate, recordClick, login, logout, register, updateProfile, updateUserProfile, createCase, acceptCase, hireLawyer, openChatWithLawyer, sendMessage, toggleLawyerVerification, closeCase, rateOtherUser, markNotificationAsRead, buyJuris, subscribePremium, togglePremiumStatus, fetchCRMClients, addCRMClient, updateCRMClient, fetchSmartDocs, addSmartDoc, fetchAgendaItems, addAgendaItem, updateAgendaItem, deleteAgendaItem, fetchSavedCalculations, saveCalculation, fetchBanners, updateBanner }}>
+       {children}
+     </AppContext.Provider>
+   );
 };
 
 export const useApp = () => {
