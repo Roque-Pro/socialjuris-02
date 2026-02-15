@@ -376,8 +376,8 @@ var require_lib = __commonJS({
 });
 
 // server.ts
-var import_express = __toESM(require("express"), 1);
-var import_cors = __toESM(require_lib(), 1);
+var import_express = __toESM(require("express"));
+var import_cors = __toESM(require_lib());
 
 // node_modules/jwt-decode/build/esm/index.js
 var InvalidTokenError = class extends Error {
@@ -436,7 +436,7 @@ function jwtDecode(token, options) {
 }
 
 // server.ts
-var import_stripe = __toESM(require("stripe"), 1);
+var import_stripe = __toESM(require("stripe"));
 var app = (0, import_express.default)();
 var port = process.env.PORT || 1e4;
 var allowedOrigins = [
@@ -471,6 +471,7 @@ app.post("/api/auth/validate-google", async (req, res) => {
   }
 });
 app.post("/api/auth/validate-facebook", async (req, res) => {
+  var _a, _b;
   const { accessToken, userID, appId } = req.body;
   try {
     if (!accessToken || !userID || !appId) {
@@ -495,7 +496,7 @@ app.post("/api/auth/validate-facebook", async (req, res) => {
         id: facebookUser.id,
         email: facebookUser.email,
         name: facebookUser.name,
-        picture: facebookUser.picture?.data?.url || ""
+        picture: ((_b = (_a = facebookUser.picture) == null ? void 0 : _a.data) == null ? void 0 : _b.url) || ""
       }
     });
   } catch (error) {
