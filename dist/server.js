@@ -456,6 +456,7 @@ app.use((0, import_cors.default)({
   credentials: true
 }));
 app.use(import_express.default.json());
+app.use(import_express.default.static("dist"));
 var getStripe = () => new import_stripe.default(process.env.STRIPE_SECRET_KEY || "");
 app.post("/api/auth/validate-google", async (req, res) => {
   const { token, clientId } = req.body;
@@ -540,6 +541,9 @@ app.post("/api/create-subscription-checkout", async (req, res) => {
   }
 });
 app.get("/health", (req, res) => res.send("Servidor Ativo"));
+app.get("*", (req, res) => {
+  res.sendFile("dist/index.html");
+});
 app.listen(port, () => {
   console.log(`\u2705 Servidor rodando na porta ${port}`);
 });
