@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../store';
 import { supabase } from '../services/supabaseClient';
 import { UserRole, CaseStatus, Case, User, Notification, SmartDoc, JurisprudenceResult, AgendaItem, CRMProfile, SavedCalculation } from '../types';
-import { Plus, Briefcase, MessageSquare, Check, X, Bell, User as UserIcon, LogOut, Award, DollarSign, Users, Activity, Filter, Search, Save, Settings, Phone, Mail, Shield, AlertCircle, MapPin, CreditCard, Coins, Loader2, Lock, FileText, Calculator, Calendar, Scale, Sparkles, BrainCircuit, TrendingUp, BarChart3, AlertTriangle, Zap, FileSearch, Folders, Clock, Eye, XCircle, Hammer, LayoutGrid, PieChart, ChevronRight, Copy, Printer, BookOpen, Download, RefreshCw, ChevronDown, GraduationCap, Heart, Landmark, BriefcaseBusiness, FileSpreadsheet, Upload, Tags, PenTool, ClipboardList, UserPlus, List, Edit2, Paperclip, Globe, Ban, CheckCircle2, Send, Menu } from 'lucide-react';
+import { Plus, Briefcase, MessageSquare, Check, X, Bell, User as UserIcon, LogOut, Award, DollarSign, Users, Activity, Filter, Search, Save, Settings, Phone, Mail, Shield, AlertCircle, MapPin, CreditCard, Coins, Loader2, Lock, FileText, Calculator, Calendar, Scale, Sparkles, BrainCircuit, TrendingUp, BarChart3, AlertTriangle, Zap, FileSearch, Folders, Clock, Eye, XCircle, Hammer, LayoutGrid, PieChart, ChevronRight, Copy, Printer, BookOpen, Download, RefreshCw, ChevronDown, GraduationCap, Heart, Landmark, BriefcaseBusiness, FileSpreadsheet, Upload, Tags, PenTool, ClipboardList, UserPlus, List, Edit2, Paperclip, Globe, Ban, CheckCircle2, Send, Menu, Share2 } from 'lucide-react';
 import { Chat } from './Chat';
 import ClickCounter from './ClickCounter';
 import { useClickLimit } from '../hooks/useClickLimit';
@@ -52,6 +52,65 @@ type ViewType = 'dashboard' | 'profile' | 'notifications' | 'new-case' | 'pro_sa
     'tool-docs' | 'tool-juris' | 'tool-writer' | 'tool-agenda' | 'tool-crm' | 'tool-intake' | 'tool-calc';
 
 // --- SHARED COMPONENTS ---
+
+// Componente de Botão de Compartilhamento
+const ShareButton: React.FC<{ caseData: any }> = ({ caseData }) => {
+  const [showShareMenu, setShowShareMenu] = useState(false);
+
+  const shareUrl = `${window.location.origin}?case=${caseData.id}`;
+  const shareText = `Confira esta demanda jurídica: ${caseData.title} - ${caseData.description}`;
+
+  const handleShare = (platform: string) => {
+    const encodedText = encodeURIComponent(shareText);
+    const encodedUrl = encodeURIComponent(shareUrl);
+
+    const urls: { [key: string]: string } = {
+      whatsapp: `https://wa.me/?text=${encodedText} ${encodedUrl}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      email: `mailto:?subject=${encodeURIComponent(caseData.title)}&body=${encodedText}`,
+    };
+
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(shareUrl);
+      alert('Link copiado!');
+    } else if (urls[platform]) {
+      window.open(urls[platform], '_blank', 'width=600,height=400');
+    }
+    setShowShareMenu(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowShareMenu(!showShareMenu)}
+        className="p-2 hover:bg-gray-100 rounded-lg transition text-slate-600 hover:text-indigo-600"
+        title="Compartilhar"
+      >
+        <Share2 className="w-5 h-5" />
+      </button>
+      {showShareMenu && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
+          <button onClick={() => handleShare('whatsapp')} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium text-slate-700 flex items-center gap-2">
+            <span>📱 WhatsApp</span>
+          </button>
+          <button onClick={() => handleShare('facebook')} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium text-slate-700 flex items-center gap-2">
+            <span>👍 Facebook</span>
+          </button>
+          <button onClick={() => handleShare('linkedin')} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium text-slate-700 flex items-center gap-2">
+            <span>💼 LinkedIn</span>
+          </button>
+          <button onClick={() => handleShare('email')} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium text-slate-700 flex items-center gap-2">
+            <span>✉️ E-mail</span>
+          </button>
+          <button onClick={() => handleShare('copy')} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium text-slate-700 flex items-center gap-2 border-t border-slate-100">
+            <Copy className="w-4 h-4" /> Copiar Link
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Badge de Verificação do Advogado
 const LawyerVerificationBadge: React.FC<{ lawyer: User; showIfPending?: boolean }> = ({ lawyer, showIfPending = false }) => {
@@ -3785,7 +3844,10 @@ export const LawyerDashboard: React.FC = () => {
 
                                             {/* Card Footer */}
                                             <div className="px-5 py-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                                                <span className="text-sm font-bold text-slate-900 flex items-center"><Coins className="w-4 h-4 text-yellow-500 mr-1" /> 5 Juris</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold text-slate-900 flex items-center"><Coins className="w-4 h-4 text-yellow-500 mr-1" /> 5 Juris</span>
+                                                    <ShareButton caseData={c} />
+                                                </div>
                                                 {hasShownInterest ? (
                                                     <button disabled className="flex-1 bg-green-100 text-green-700 px-4 py-2.5 rounded-full text-sm font-bold flex items-center justify-center cursor-default">
                                                         <Check className="w-4 h-4 mr-1.5" /> Interesse Enviado
