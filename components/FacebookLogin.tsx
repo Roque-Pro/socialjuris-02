@@ -75,7 +75,7 @@ export const FacebookLogin: React.FC<FacebookLoginProps> = ({ onSuccess, onError
     <button
       onClick={handleFacebookLogin}
       disabled={isLoading}
-      className="w-full h-10 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+      className="w-full h-10 flex items-center justify-center gap-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium hidden"
     >
       <svg
         className="w-4 h-4"

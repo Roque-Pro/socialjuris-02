@@ -38,7 +38,7 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({ onLoading, onError }
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 w-full hidden">
       {/* Botão Google */}
       <button
         onClick={handleGoogleLogin}

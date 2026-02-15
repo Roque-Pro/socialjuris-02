@@ -63,7 +63,7 @@ export const GoogleLogin: React.FC<GoogleLoginProps> = ({ onSuccess, onError }) 
   };
 
   return (
-    <div id="google-login-btn" className="w-full flex justify-center">
+    <div id="google-login-btn" className="w-full flex justify-center hidden">
       {isLoading && <div className="text-sm text-gray-600">Processando...</div>}
     </div>
   );
