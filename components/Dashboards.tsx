@@ -56,6 +56,8 @@ type ViewType = 'dashboard' | 'profile' | 'notifications' | 'new-case' | 'pro_sa
 // Componente de Botão de Compartilhamento
 const ShareButton: React.FC<{ caseData: any }> = ({ caseData }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
 
   const shareUrl = `${window.location.origin}?case=${caseData.id}`;
   const shareText = `Confira esta demanda jurídica: ${caseData.title} - ${caseData.description}`;
@@ -80,17 +82,29 @@ const ShareButton: React.FC<{ caseData: any }> = ({ caseData }) => {
     setShowShareMenu(false);
   };
 
+  const toggleMenu = () => {
+    if (!showShareMenu && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({
+        top: rect.bottom + 8,
+        left: rect.left - 180
+      });
+    }
+    setShowShareMenu(!showShareMenu);
+  };
+
   return (
-    <div className="relative">
+    <div>
       <button
-        onClick={() => setShowShareMenu(!showShareMenu)}
+        ref={buttonRef}
+        onClick={toggleMenu}
         className="p-2 hover:bg-gray-100 rounded-lg transition text-slate-600 hover:text-indigo-600"
         title="Compartilhar"
       >
         <Share2 className="w-5 h-5" />
       </button>
       {showShareMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
+        <div className="fixed bg-white rounded-lg shadow-xl border border-slate-200 z-50 w-48" style={{ top: `${menuPos.top}px`, left: `${menuPos.left}px` }}>
           <button onClick={() => handleShare('whatsapp')} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm font-medium text-slate-700 flex items-center gap-2">
             <span>📱 WhatsApp</span>
           </button>
