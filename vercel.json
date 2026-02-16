@@ -12,6 +12,10 @@
       "destination": "/$1.html"
     },
     {
+      "source": "/dashboard(.*)",
+      "destination": "/index.html"
+    },
+    {
       "source": "/((?!\\.)(?!api\\/).)*",
       "destination": "/index.html"
     }
