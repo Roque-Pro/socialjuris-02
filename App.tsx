@@ -217,6 +217,17 @@ const MainApp = () => {
   const [authView, setAuthView] = useState<{ type: 'login' | 'register', role: UserRole } | null>(null);
   const [showFacebookModal, setShowFacebookModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (payment) {
+      setPaymentStatus(payment);
+      // Limpar URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     // Mostrar modal em TODOS os logins para sempre alimentar o indicador
@@ -239,6 +250,16 @@ const MainApp = () => {
   if (currentUser) {
     return (
       <>
+        {paymentStatus === 'success' && (
+          <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            ✓ Compra realizada com sucesso!
+          </div>
+        )}
+        {paymentStatus === 'canceled' && (
+          <div className="fixed top-4 right-4 bg-yellow-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            ⚠ Pagamento cancelado
+          </div>
+        )}
         {(() => {
           switch (currentUser.role) {
             case UserRole.CLIENT: return <ClientDashboard />;
