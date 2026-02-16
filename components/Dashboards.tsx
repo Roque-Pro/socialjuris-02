@@ -4177,6 +4177,12 @@ export const AdminDashboard: React.FC = () => {
          }
      };
      
+     const normalizeUrl = (url: string) => {
+         if (!url) return '';
+         if (url.startsWith('http://') || url.startsWith('https://')) return url;
+         return 'https://' + url;
+     };
+
      const handleBanner1LinkChange = async () => {
          if (!banner1Image) {
              alert('Por favor, primeiro adicione uma imagem para o Banner 1');
@@ -4184,7 +4190,9 @@ export const AdminDashboard: React.FC = () => {
          }
          try {
              setSavingBanner1(true);
-             await updateBanner('banner_1', banner1Image, banner1Link);
+             const normalizedLink = normalizeUrl(banner1Link);
+             await updateBanner('banner_1', banner1Image, normalizedLink);
+             setBanner1Link(normalizedLink);
              alert('Link do Banner 1 atualizado com sucesso!');
          } catch (error: any) {
              alert('Erro ao atualizar link: ' + error.message);
@@ -4217,7 +4225,9 @@ export const AdminDashboard: React.FC = () => {
          }
          try {
              setSavingBanner2(true);
-             await updateBanner('banner_2', banner2Image, banner2Link);
+             const normalizedLink = normalizeUrl(banner2Link);
+             await updateBanner('banner_2', banner2Image, normalizedLink);
+             setBanner2Link(normalizedLink);
              alert('Link do Banner 2 atualizado com sucesso!');
          } catch (error: any) {
              alert('Erro ao atualizar link: ' + error.message);
