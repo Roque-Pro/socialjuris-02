@@ -6,7 +6,7 @@ Um sistema **100% pronto** de gerenciamento dinâmico de banners no painel admin
 
 ---
 
-## 📦 Arquivos Entregues
+## 📦 Arquivos
 
 ### 🔧 Código Modificado
 1. **types.ts** - Interface Banner (+15 linhas)
