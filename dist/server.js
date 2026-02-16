@@ -440,7 +440,7 @@ var import_stripe = __toESM(require("stripe"));
 var app = (0, import_express.default)();
 var port = process.env.PORT || 1e4;
 var allowedOrigins = [
-  "https://socialjuridico-roque-rafaels-projects.vercel.app",
+  "https://www.socialjuridico.com.br",
   "https://socialjuridico-roque-rafaels-projects.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173"

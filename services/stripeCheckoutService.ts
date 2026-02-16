@@ -7,8 +7,8 @@ export interface CheckoutResponse {
   error?: string;
 }
 
-// Usa URL relativa - funciona em qualquer lugar (localhost, cPanel, Render, etc)
-const API_BASE_URL = '';
+// Usa Render como backend
+const API_BASE_URL = 'https://socialjuris-02.onrender.com';
 
 export async function createJurisCheckoutSession(
   userId: string,
