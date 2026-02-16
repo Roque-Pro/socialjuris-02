@@ -83,3 +83,5 @@ Como os clientes pagam para publicar, você tem acesso a demandas reais e séria
 ✅ IMPLEMENTADO: Foi adcionado um modal poup-up para que assim que o usuário fizer login já indique se conhece ou faz parte do grupo no facebook. Faz mais sentido até do que login via facebook, pois o usuario por ter facebook e não fazer parte do grupo. A pesquisa pois login é mais assertiva e ja esta alimentando o painel do admin
 
 17-Para adicionar o banner /anuncio eu consigo fazer pelo adm ou tenho que pedir para você fazer? O banner terá um link?
+
+✅ IMPLEMENTADO: Agora voce pode inserir banner e link a partir do painel de admin

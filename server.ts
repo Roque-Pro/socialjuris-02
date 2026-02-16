@@ -27,6 +27,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.static('dist'));
 
 // --- 2. INICIALIZAÇÃO DE SERVIÇOS (STRIPE/SUPABASE) ---
 const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY || '');
@@ -136,6 +137,11 @@ app.post('/api/create-subscription-checkout', async (req, res) => {
 });
 
 app.get('/health', (req, res) => res.send('Servidor Ativo'));
+
+// Catch-all para React Router
+app.get('*', (req, res) => {
+  res.sendFile('dist/index.html');
+});
 
 // --- 4. LIGAR SERVIDOR ---
 app.listen(port, () => {
