@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { User } from '../types';
 import { Button } from './Button';
-import { generateWelcomeMessage } from '../services/geminiService';
+import { generateWelcomeMessage } from '../services/aiProvider';
 import { LogOut, Sparkles, User as UserIcon } from 'lucide-react';
 
 interface DashboardProps {

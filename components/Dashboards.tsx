@@ -10,7 +10,7 @@ import { useClickLimit } from '../hooks/useClickLimit';
 import ClickLimitModal from './ClickLimitModal';
 import MarketPricesIndex from './MarketPricesIndex';
 import bannerTeste from '../img/banner_teste.png';
-import { analyzeCaseDescription, calculateCasePrice, autoTagDocument, searchJurisprudence, generateLegalDraft, analyzeCRMRisk, diagnoseIntake, calculateLegalMath, generateClientProfile, generateNextAction, chatWithClientAI, generateClientTags, generateClientReport, suggestDeadlines, generatePreparationChecklist, analyzeAgendaConflicts, generateAgendaSummary, generateIntakeQuestions, estimateCaseValue, analyzeViability } from '../services/geminiService';
+import { analyzeCaseDescription, calculateCasePrice, autoTagDocument, searchJurisprudence, generateLegalDraft, analyzeCRMRisk, diagnoseIntake, calculateLegalMath, generateClientProfile, generateNextAction, chatWithClientAI, generateClientTags, generateClientReport, suggestDeadlines, generatePreparationChecklist, analyzeAgendaConflicts, generateAgendaSummary, generateIntakeQuestions, estimateCaseValue, analyzeViability } from '../services/aiProvider';
 import { calculateRescisaoCompleta, calculateFerias, calculateHorasExtras, calculateCorrecaoMonetaria, calculateJurosMoratorios, calculateAposentadoriaIdade, calculateSELIC, calculatePensaoAlimenticia, calculateHonorarios, calculatePrazoCPC } from '../services/calculatorsService';
 
 // --- CONSTANTES ---
@@ -2066,22 +2066,75 @@ const ToolAgenda: React.FC = () => {
                 </div>
             </div>
 
-            {/* CONFLITOS PANEL */}
-            {conflicts && conflicts.conflicts && conflicts.conflicts.length > 0 && (
-                <div className="bg-red-50 border border-red-300 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle className="w-5 h-5 text-red-600" />
-                        <h4 className="font-bold text-red-900">Conflitos Detectados</h4>
-                    </div>
-                    <div className="space-y-2">
-                        {conflicts.conflicts.map((c: any, i: number) => (
-                            <div key={i} className="bg-white p-3 rounded-lg border-l-4 border-red-500 text-sm">
-                                <p className="font-bold text-slate-900">{c.event1} × {c.event2}</p>
-                                <p className="text-slate-600 text-xs">{c.suggestion}</p>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded mt-1 inline-block ${c.riskLevel === 'Alta' ? 'bg-red-200 text-red-700' : 'bg-yellow-200 text-yellow-700'}`}>{c.riskLevel}</span>
+            {/* ANÁLISE COMPLETA DE AGENDA */}
+            {conflicts && (
+                <div className="space-y-4">
+                    {/* CONFLITOS PANEL */}
+                    {conflicts.conflicts && conflicts.conflicts.length > 0 && (
+                        <div className="bg-red-50 border border-red-300 rounded-xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <AlertTriangle className="w-5 h-5 text-red-600" />
+                                <h4 className="font-bold text-red-900">⚠️ Conflitos Detectados ({conflicts.conflicts.length})</h4>
                             </div>
-                        ))}
-                    </div>
+                            <div className="space-y-2">
+                                {conflicts.conflicts.map((c: any, i: number) => (
+                                    <div key={i} className="bg-white p-3 rounded-lg border-l-4 border-red-500 text-sm">
+                                        <p className="font-bold text-slate-900">{c.event1} × {c.event2}</p>
+                                        <p className="text-slate-600 text-xs mt-1">{c.suggestion}</p>
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded mt-2 inline-block ${c.riskLevel === 'Alta' ? 'bg-red-200 text-red-700' : 'bg-yellow-200 text-yellow-700'}`}>{c.riskLevel}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* DIAS SOBRECARREGADOS */}
+                    {conflicts.overloadedDays && conflicts.overloadedDays.length > 0 && (
+                        <div className="bg-orange-50 border border-orange-300 rounded-xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <AlertTriangle className="w-5 h-5 text-orange-600" />
+                                <h4 className="font-bold text-orange-900">📅 Dias Sobrecarregados ({conflicts.overloadedDays.length})</h4>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                {conflicts.overloadedDays.map((day: string, i: number) => (
+                                    <div key={i} className="bg-white p-3 rounded-lg border border-orange-200 text-center">
+                                        <p className="text-sm font-bold text-orange-700">{new Date(day).toLocaleDateString('pt-BR')}</p>
+                                        <p className="text-[10px] text-orange-600 mt-1">Múltiplos eventos</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* REAGENDAMENTOS RECOMENDADOS */}
+                    {conflicts.recommendedReschedules && conflicts.recommendedReschedules.length > 0 && (
+                        <div className="bg-blue-50 border border-blue-300 rounded-xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Calendar className="w-5 h-5 text-blue-600" />
+                                <h4 className="font-bold text-blue-900">🔄 Reagendamentos Recomendados ({conflicts.recommendedReschedules.length})</h4>
+                            </div>
+                            <div className="space-y-2">
+                                {conflicts.recommendedReschedules.map((r: any, i: number) => (
+                                    <div key={i} className="bg-white p-3 rounded-lg border-l-4 border-blue-500 text-sm">
+                                        <p className="font-bold text-slate-900">{r.event}</p>
+                                        <p className="text-slate-600 text-xs mt-1"><span className="font-bold">Nova data:</span> {new Date(r.suggestedNewDate).toLocaleDateString('pt-BR')}</p>
+                                        <p className="text-slate-600 text-xs mt-1"><span className="font-bold">Motivo:</span> {r.reason}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MENSAGEM QUANDO NÃO HÁ PROBLEMAS */}
+                    {(!conflicts.conflicts || conflicts.conflicts.length === 0) && 
+                     (!conflicts.overloadedDays || conflicts.overloadedDays.length === 0) && (
+                        <div className="bg-green-50 border border-green-300 rounded-xl p-4">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                <p className="font-bold text-green-900">✓ Agenda otimizada - Sem conflitos detectados</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -3513,8 +3566,10 @@ export const ClientDashboard: React.FC = () => {
                   <div className="flex-1">
                       <header className="flex justify-between items-center mb-8">
                           <div>
-                              <h1 className="text-2xl font-bold text-slate-900 capitalize">{view.replace('-', ' ')}</h1>
-                              <p className="text-slate-500">Bem-vindo, {currentUser?.name}</p>
+                               <h1 className="text-2xl font-bold text-slate-900">
+                                   {view === 'new-case' ? 'Novo Caso' : view === 'dashboard' ? 'Painel' : view.replace('-', ' ').charAt(0).toUpperCase() + view.replace('-', ' ').slice(1)}
+                               </h1>
+                               <p className="text-slate-500">Bem-vindo, {currentUser?.name}</p>
                           </div>
                           <div className="flex items-center space-x-4">
                               <img src={currentUser?.avatar} alt="Profile" className="w-10 h-10 rounded-full border border-slate-200" />

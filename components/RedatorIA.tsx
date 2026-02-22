@@ -12,7 +12,7 @@ import {
     generateLegalDraft, analyzeCase, generateDraftVariations,
     findRelatedJurisprudence, analyzeDraftStrength, suggestImprovements,
     compareDrafts, checkCompliance
-} from '../services/geminiService';
+} from '../services/aiProvider';
 
 interface DraftConfig {
     type: string;

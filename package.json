@@ -3,13 +3,11 @@
   "type": "module",
   "private": true,
   "version": "0.0.0",
-
   "scripts": {
     "dev": "vite",
     "build": "vite build && esbuild server.ts --bundle --platform=node --target=es2019 --outfile=dist/server.js --external:express --external:stripe",
     "preview": "vite preview"
   },
-
   "dependencies": {
     "@google/genai": "^1.31.0",
     "@react-oauth/google": "^0.12.1",
@@ -20,11 +18,11 @@
     "express": "^5.2.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.556.0",
+    "openai": "^6.22.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "stripe": "^20.3.1"
   },
-
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@types/express": "^4.17.21",

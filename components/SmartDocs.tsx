@@ -11,7 +11,7 @@ import { SmartDoc } from '../types';
 import { 
   analyzeDocumentAI, chatWithDocument, compareDocuments, 
   semanticSearch, generateComplianceChecklist, extractDocumentData 
-} from '../services/geminiService';
+} from '../services/aiProvider';
 
 interface DocumentAnalysis {
   type: string;
