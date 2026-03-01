@@ -1,0 +1,43 @@
+{
+  "name": "socialjuris4.1",
+  "type": "module",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "concurrently \"tsx server.ts\" \"vite\"",
+    "dev:server": "tsx server.ts",
+    "dev:frontend": "vite",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --target=es2019 --outfile=dist/server.js --external:express --external:stripe",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.31.0",
+    "@react-oauth/google": "^0.12.1",
+    "@stripe/stripe-js": "^3.0.0",
+    "@supabase/supabase-js": "2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.556.0",
+    "openai": "^6.22.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "stripe": "^20.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.24",
+    "concurrently": "^8.2.0",
+    "esbuild": "^0.27.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
