@@ -1856,7 +1856,7 @@ const SystemDocumentation: React.FC = () => {
     return (
         <div className="space-y-6 p-4">
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 rounded-2xl">
-                <h1 className="text-3xl font-bold mb-2">📖 Documentação do SocialJuridico</h1>
+                <h1 className="text-3xl font-bold mb-2">📖 Documentação do SocialJurídico</h1>
                 <p className="text-indigo-100">Guia completo para dominar a plataforma e potencializar sua prática jurídica</p>
             </div>
 
@@ -1871,7 +1871,7 @@ const SystemDocumentation: React.FC = () => {
             <div className="bg-white p-8 rounded-2xl border border-slate-200">
                 {tab === 'overview' && (
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold mb-6 text-slate-900">O que é SocialJuridico? 🏛️</h2>
+                        <h2 className="text-3xl font-bold mb-6 text-slate-900">O que é SocialJurídico? 🏛️</h2>
                         
                         <div className="bg-indigo-50 border-l-4 border-indigo-600 p-6 rounded-lg mb-6">
                             <p className="text-slate-800 leading-relaxed text-base">
@@ -4288,6 +4288,7 @@ export const LawyerDashboard: React.FC = () => {
     const { handleClick: recordClick, showLimitModal, setShowLimitModal } = useClickLimit();
     const [view, setView] = useState<ViewType>('market');
     const [selectedCase, setSelectedCase] = useState<Case | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [filterArea, setFilterArea] = useState('');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -4590,7 +4591,7 @@ export const LawyerDashboard: React.FC = () => {
                                                     <div className="w-full bg-slate-100 mt-2 pt-3">
                                                         <div className="flex overflow-x-auto gap-2 px-5 pb-3">
                                                             {c.images.map((img: any, idx: number) => (
-                                                                <img key={idx} src={img.data || img} alt={`Case ${idx}`} className="h-80 w-80 object-cover rounded-lg flex-shrink-0" />
+                                                                <img key={idx} src={img.data || img} alt={`Case ${idx}`} className="h-80 w-80 object-cover rounded-lg flex-shrink-0 cursor-pointer hover:opacity-80 hover:shadow-lg transition-all" onClick={() => setSelectedImage(img.data || img)} />
                                                             ))}
                                                         </div>
                                                     </div>
@@ -4723,6 +4724,17 @@ export const LawyerDashboard: React.FC = () => {
             {showPremiumModal && <PremiumModal />}
             {/* Modal de Limite de Cliques */}
             {showBuyModal && <BuyJurisModal />}
+            {/* Modal de Imagem */}
+            {selectedImage && (
+                <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
+                    <div className="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-auto relative" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 bg-slate-900 text-white p-2 rounded-lg hover:bg-indigo-600 transition z-10">
+                            <X className="w-6 h-6" />
+                        </button>
+                        <img src={selectedImage} alt="Caso em detalhe" className="w-full h-auto object-contain" />
+                    </div>
+                </div>
+            )}
 
             {/* Lawyer Sidebar */}
             <div className={`${sidebarOpen ? 'w-64' : 'w-20'} lg:w-64 bg-slate-900 text-white flex flex-col fixed h-full z-20 transition-all duration-300`}>
