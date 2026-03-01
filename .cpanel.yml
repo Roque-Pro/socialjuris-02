@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/alabamco/socialjuridico.com.br/
+    - /bin/cp -R dist/* $DEPLOYPATH
