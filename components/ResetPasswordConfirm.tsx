@@ -13,15 +13,20 @@ export const ResetPasswordConfirm: React.FC = () => {
   const { resetPasswordWithCode } = useApp();
 
   useEffect(() => {
-    // Capturar o código da URL
-    const params = new URLSearchParams(window.location.search);
-    const codeFromUrl = params.get('code');
+    // Capturar erro da URL (vem como hash fragment do Supabase)
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.substring(1)); // Remove o '#'
     
-    if (!codeFromUrl) {
-      setError('Código de recuperação não encontrado. O link pode estar expirado.');
+    const errorFromUrl = params.get('error');
+    const errorDescription = params.get('error_description');
+    
+    if (errorFromUrl) {
+      let errorMsg = 'Erro ao processar o link de recuperação';
+      if (errorDescription) {
+        errorMsg = decodeURIComponent(errorDescription);
+      }
+      setError(errorMsg);
       setStatus('error');
-    } else {
-      setCode(codeFromUrl);
     }
   }, []);
 
@@ -39,14 +44,11 @@ export const ResetPasswordConfirm: React.FC = () => {
       return;
     }
 
-    if (!code) {
-      setError('Código de recuperação não encontrado');
-      return;
-    }
-
     setLoading(true);
     try {
-      await resetPasswordWithCode(code, newPassword);
+      // O Supabase já autenticou o usuário via email link
+      // Agora só precisamos atualizar a senha
+      await resetPasswordWithCode(newPassword);
       setStatus('success');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erro ao atualizar senha';

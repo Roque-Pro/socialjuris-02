@@ -237,10 +237,15 @@ const MainApp = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
-    const code = params.get('code');
     
-    if (code) {
-      // Se houver código de reset, mostrar página de confirmação
+    // Verificar se há hash (do Supabase email link)
+    const hash = window.location.hash;
+    const hashParams = new URLSearchParams(hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery' && accessToken) {
+      // Se houver token de recuperação, mostrar página de confirmação
       setShowResetConfirm(true);
     } else if (payment) {
       setPaymentStatus(payment);

@@ -25,7 +25,7 @@ interface AppContextType {
   logout: () => Promise<void>;
   register: (user: Omit<User, 'id' | 'createdAt' | 'avatar'>, password?: string) => Promise<void>;
   resetPassword: (email: string, newPassword?: string) => Promise<void>;
-  resetPasswordWithCode: (code: string, newPassword: string) => Promise<void>;
+  resetPasswordWithCode: (newPassword: string) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   updateUserProfile: (userId: string, data: Partial<User>) => Promise<void>;
   addCreditsToUser: (userId: string, amount: number) => Promise<void>;
@@ -647,26 +647,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
      }
    };
 
-   const resetPasswordWithCode = async (code: string, newPassword: string) => {
+   const resetPasswordWithCode = async (newPassword: string) => {
      try {
-       // O código vem da URL após o usuário clicar no link do email
-       // Supabase irá validar o código e permitir que o usuário atualize a senha
-       const { error } = await supabase.auth.verifyOtp({
-         token: code,
-         type: 'recovery'
-       });
+       // Quando o usuário clica no link do email, o Supabase automaticamente
+       // cria uma sessão autenticada. Então podemos direto atualizar a senha.
+       const { error } = await supabase.auth.updateUser({ password: newPassword });
 
        if (error) {
-         throw new Error(error.message || "Código inválido ou expirado");
+         throw new Error(error.message || "Erro ao atualizar senha");
        }
 
-       // Após verificar o OTP, atualizar a senha
-       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-       if (updateError) {
-         throw new Error(updateError.message || "Erro ao atualizar senha");
-       }
-
-       // Fazer logout
+       // Fazer logout para forçar o usuário a fazer login com a nova senha
        await supabase.auth.signOut();
      } catch (error) {
        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
