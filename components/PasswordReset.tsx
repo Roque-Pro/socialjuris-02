@@ -7,13 +7,10 @@ interface PasswordResetProps {
 }
 
 export const PasswordReset: React.FC<PasswordResetProps> = ({ onBack }) => {
-  const [step, setStep] = useState<'email' | 'newPassword' | 'success'>('email');
+  const [step, setStep] = useState<'email' | 'sent'>('email');
   const [email, setEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const { resetPassword } = useApp();
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -27,36 +24,11 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ onBack }) => {
 
     setLoading(true);
     try {
+      // Enviar email de recuperação - o Supabase faz isso automaticamente
       await resetPassword(email);
-      setStep('newPassword');
+      setStep('sent');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erro ao enviar e-mail de recuperação';
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!newPassword || newPassword.length < 6) {
-      setError('A senha deve ter no mínimo 6 caracteres');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError('As senhas não coincidem');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await resetPassword(email, newPassword);
-      setStep('success');
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Erro ao atualizar senha';
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -152,81 +124,7 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ onBack }) => {
             </div>
           )}
 
-          {step === 'newPassword' && (
-            <div className="space-y-6">
-              <div className="text-center lg:text-left">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">Definir Nova Senha</h1>
-                <p className="mt-2 text-sm text-gray-600">
-                  Insira sua nova senha para reativar sua conta
-                </p>
-              </div>
-
-              <form className="space-y-6" onSubmit={handlePasswordSubmit}>
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {error}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Nova Senha</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">Mínimo 6 caracteres</p>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Confirmar Senha</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="show-password"
-                    checked={showPassword}
-                    onChange={(e) => setShowPassword(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <label htmlFor="show-password" className="ml-2 text-sm text-gray-600">
-                    Mostrar Senha
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-600/20 transition flex items-center justify-center"
-                >
-                  {loading ? 'Atualizando...' : 'Atualizar Senha'}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {step === 'success' && (
+          {step === 'sent' && (
             <div className="space-y-6 text-center">
               <div className="flex justify-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -235,9 +133,12 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({ onBack }) => {
               </div>
               
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">Senha Atualizada!</h1>
-                <p className="mt-2 text-sm text-gray-600">
-                  Sua senha foi alterada com sucesso. Você pode fazer login com sua nova senha.
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900">Email Enviado!</h1>
+                <p className="mt-4 text-sm text-gray-600">
+                  Verifique sua caixa de entrada. Enviamos um link para você redefinir sua senha.
+                </p>
+                <p className="mt-2 text-xs text-gray-500">
+                  O link expira em 24 horas. Não encontrou o email? Verifique a pasta de spam.
                 </p>
               </div>
 
