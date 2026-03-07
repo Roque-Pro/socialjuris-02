@@ -230,6 +230,7 @@ const MainApp = () => {
   const [authView, setAuthView] = useState<{ type: 'login' | 'register', role: UserRole } | null>(null);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isResetFlow, setIsResetFlow] = useState(false);
   const [showFacebookModal, setShowFacebookModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
@@ -247,6 +248,7 @@ const MainApp = () => {
     if (type === 'recovery' && accessToken) {
       // Se houver token de recuperação, mostrar página de confirmação
       setShowResetConfirm(true);
+      setIsResetFlow(true); // Flag para não redirecionar para dashboard
     } else if (payment) {
       setPaymentStatus(payment);
       // Limpar URL
@@ -271,6 +273,18 @@ const MainApp = () => {
     }
     setShowFacebookModal(false);
   };
+
+  // Se estamos no fluxo de reset de senha, mostrar ResetPasswordConfirm mesmo com usuário logado
+  if (isResetFlow && showResetConfirm) {
+    return (
+      <ResetPasswordConfirm 
+        onSuccess={() => {
+          setIsResetFlow(false);
+          setShowResetConfirm(false);
+        }}
+      />
+    );
+  }
 
   if (currentUser) {
     return (

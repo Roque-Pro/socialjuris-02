@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useApp } from '../store';
 
-export const ResetPasswordConfirm: React.FC = () => {
+interface ResetPasswordConfirmProps {
+  onSuccess?: () => void;
+}
+
+export const ResetPasswordConfirm: React.FC<ResetPasswordConfirmProps> = ({ onSuccess }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -232,12 +236,16 @@ export const ResetPasswordConfirm: React.FC = () => {
                 </p>
               </div>
 
-              <a
-                href="/"
+              <button
+                onClick={() => {
+                  onSuccess?.();
+                  // Redirecionar para a página principal
+                  window.location.href = '/';
+                }}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-600/20 transition text-center block"
               >
                 Voltar ao Login
-              </a>
+              </button>
             </div>
           )}
         </div>
