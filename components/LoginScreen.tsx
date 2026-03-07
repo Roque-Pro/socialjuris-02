@@ -6,9 +6,10 @@ import { LoginStatus, User } from '../types';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: User) => void;
+  onForgotPassword?: () => void;
 }
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onForgotPassword }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -178,9 +179,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                     </label>
                   </div>
                   <div className="text-sm">
-                    <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                    <button 
+                      type="button"
+                      onClick={onForgotPassword}
+                      className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+                    >
                       Esqueceu a senha?
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>

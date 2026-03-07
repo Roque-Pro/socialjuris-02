@@ -8,17 +8,21 @@ import { GoogleLogin } from './components/GoogleLogin';
 import { FacebookLogin } from './components/FacebookLogin';
 import { OAuthButtons } from './components/OAuthButtons';
 import { FacebookGroupModal } from './components/FacebookGroupModal';
+import { PasswordReset } from './components/PasswordReset';
+import { ResetPasswordConfirm } from './components/ResetPasswordConfirm';
 
 const AuthScreen = ({ 
   type, 
   role, 
   onBack, 
-  onSwitchMode 
+  onSwitchMode,
+  onForgotPassword
 }: { 
   type: 'login' | 'register'; 
   role: UserRole; 
   onBack: () => void;
   onSwitchMode: () => void;
+  onForgotPassword?: () => void;
 }) => {
   const { login, register } = useApp();
   const [email, setEmail] = useState('');
@@ -151,6 +155,15 @@ const AuthScreen = ({
                       placeholder="Sua senha secreta" 
                     />
                  </div>
+                 {type === 'login' && (
+                   <button
+                     type="button"
+                     onClick={onForgotPassword}
+                     className="text-xs text-indigo-600 hover:text-indigo-700 font-medium mt-2"
+                   >
+                     Esqueceu sua senha?
+                   </button>
+                 )}
              </div>
 
              {type === 'register' && role === UserRole.LAWYER && (
@@ -215,6 +228,8 @@ const AuthScreen = ({
 const MainApp = () => {
   const { currentUser, updateUserProfile } = useApp();
   const [authView, setAuthView] = useState<{ type: 'login' | 'register', role: UserRole } | null>(null);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showFacebookModal, setShowFacebookModal] = useState(false);
   const [hasSeenModal, setHasSeenModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
@@ -222,7 +237,12 @@ const MainApp = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
-    if (payment) {
+    const code = params.get('code');
+    
+    if (code) {
+      // Se houver código de reset, mostrar página de confirmação
+      setShowResetConfirm(true);
+    } else if (payment) {
       setPaymentStatus(payment);
       // Limpar URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -286,6 +306,18 @@ const MainApp = () => {
     }
   };
 
+  if (showResetConfirm) {
+    return <ResetPasswordConfirm />;
+  }
+
+  if (showPasswordReset) {
+    return (
+      <PasswordReset 
+        onBack={() => setShowPasswordReset(false)}
+      />
+    );
+  }
+
   if (authView) {
     return (
       <AuthScreen 
@@ -293,6 +325,10 @@ const MainApp = () => {
         role={authView.role} 
         onBack={() => setAuthView(null)} 
         onSwitchMode={toggleAuthMode}
+        onForgotPassword={() => {
+          setAuthView(null);
+          setShowPasswordReset(true);
+        }}
       />
     );
   }
