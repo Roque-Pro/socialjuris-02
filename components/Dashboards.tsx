@@ -195,7 +195,8 @@ const UserProfile: React.FC = () => {
 
         setPasswordLoading(true);
         try {
-            const response = await fetch('http://localhost:10000/api/auth/admin-reset-password', {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+            const response = await fetch(`${apiUrl}/api/auth/admin-reset-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -5105,7 +5106,8 @@ export const AdminDashboard: React.FC = () => {
 
         setPasswordLoading(true);
         try {
-            const response = await fetch('http://localhost:10000/api/auth/admin-reset-password', {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+            const response = await fetch(`${apiUrl}/api/auth/admin-reset-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
