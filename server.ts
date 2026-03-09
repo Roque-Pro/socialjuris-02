@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-dotenv.config(); // Carrega variáveis do .env
+dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
@@ -37,6 +37,81 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// ⚠️ ROTAS DE API DEVEM VIR ANTES DO express.static('dist')
+// Senão o Vite vai interceptar com o catch-all
+app.post('/api/auth/admin-reset-password', async (req, res) => {
+  try {
+    const { userId, newPassword, userEmail } = req.body;
+    
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Senha deve ter pelo menos 6 caracteres' });
+    }
+
+    if (!userId && !userEmail) {
+      return res.status(400).json({ error: 'userId ou userEmail é obrigatório' });
+    }
+
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    
+    if (!serviceRoleKey) {
+      console.error('Erro: SUPABASE_SERVICE_ROLE_KEY não definida');
+      console.error('Variáveis disponíveis:', Object.keys(process.env).filter(k => k.includes('SUPABASE')));
+      return res.status(500).json({ error: 'Variável SUPABASE_SERVICE_ROLE_KEY não configurada' });
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl || '', serviceRoleKey);
+
+    let targetUserId = userId;
+    
+    // Se só temos email, busca na tabela public.users
+    if (!targetUserId && userEmail) {
+      const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .ilike('email', userEmail)
+        .single();
+      
+      if (user) {
+        targetUserId = user.id;
+      }
+    }
+    
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'userId ou userEmail é obrigatório' });
+    }
+
+    // Tentar atualizar a senha
+    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+      password: newPassword
+    });
+
+    if (error) {
+      console.log('Nota: Usuário não encontrado em auth.users, pode ser usuário criado manualmente');
+      return res.status(500).json({ 
+        error: `Erro ao resetar senha: ${error.message}` 
+      });
+    }
+
+    // Marcar que o usuário deve alterar a senha na próxima vez que logar
+    await supabaseAdmin
+      .from('users')
+      .update({ mustChangePassword: true })
+      .eq('id', targetUserId);
+
+    return res.json({ 
+      success: true, 
+      message: `Senha alterada com sucesso. Usuário será obrigado a alterar na próxima vez que logar`,
+      email: data.user.email
+    });
+  } catch (error: any) {
+    return res.status(500).json({ 
+      error: `Erro: ${error.message}`
+    });
+  }
+});
+
 app.use(express.static('dist'));
 
 // --- 2. INICIALIZAÇÃO DE SERVIÇOS (STRIPE/SUPABASE/OPENAI) ---
@@ -1165,6 +1240,129 @@ RESPONDA APENAS COM JSON VÁLIDO, SEM MARKDOWN, SEM EXPLICAÇÕES.`
   } catch (error: any) {
     console.error('❌ AI Diagnose Intake Error:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'ok', message: 'Servidor rodando' });
+});
+
+// Reset de Senha Robusto (Admin)
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, userEmail } = req.body;
+    
+    if (!email && !userEmail) {
+      console.warn('⚠️ Email não fornecido');
+      return res.status(400).json({ error: 'email ou userEmail é obrigatório' });
+    }
+
+    const targetEmail = email || userEmail;
+    console.log(`🔐 Tentando resetar senha para: ${targetEmail}`);
+
+    // Limpar email (remover espaços)
+    const cleanEmail = targetEmail.trim().toLowerCase();
+    console.log(`📧 Email limpo: ${cleanEmail}`);
+
+    const supabase = getSupabase();
+    
+    // Opção 1: Tentar com resetPasswordForEmail (padrão)
+    const redirectUrl = `${process.env.VITE_APP_URL || 'http://localhost:5173'}/reset-password-confirm`;
+    console.log(`🔗 Redirect URL: ${redirectUrl}`);
+    
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+      redirectTo: redirectUrl
+    });
+
+    if (resetError) {
+      console.error('❌ Erro ao resetar senha (método 1):', resetError.message);
+      
+      // Se falhar, tentar encontrar o usuário no banco
+      try {
+        console.log(`🔍 Procurando usuário com email: ${cleanEmail}`);
+        
+        const { data: userData, error: findError } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .eq('email', cleanEmail)
+          .single();
+
+        if (findError) {
+          console.warn('⚠️ Usuário não encontrado com .eq(), tentando .ilike()');
+          
+          const { data: userData2, error: findError2 } = await supabase
+            .from('profiles')
+            .select('id, email')
+            .ilike('email', cleanEmail)
+            .single();
+
+          if (findError2) {
+            console.error('❌ Usuário não encontrado:', findError2.message);
+            return res.status(404).json({ 
+              error: `Usuário não encontrado: ${cleanEmail}` 
+            });
+          }
+
+          // Tentar novamente com email exato
+          console.log(`🔄 Tentando reset com email exato: ${userData2.email}`);
+          const { error: retryError } = await supabase.auth.resetPasswordForEmail(userData2.email, {
+            redirectTo: redirectUrl
+          });
+
+          if (retryError) {
+            console.error('❌ Erro no retry:', retryError.message);
+            return res.status(500).json({ 
+              error: `Falha ao resetar: ${retryError.message}`
+            });
+          }
+
+          console.log(`✅ Email enviado para: ${userData2.email}`);
+          return res.json({ 
+            success: true, 
+            message: `Email de reset enviado para ${userData2.email}`,
+            email: userData2.email
+          });
+        }
+
+        // Tentar novamente com o email exato
+        console.log(`🔄 Tentando reset com email exato: ${userData.email}`);
+        const { error: retryError } = await supabase.auth.resetPasswordForEmail(userData.email, {
+          redirectTo: redirectUrl
+        });
+
+        if (retryError) {
+          console.error('❌ Erro no retry:', retryError.message);
+          return res.status(500).json({ 
+            error: `Falha ao resetar: ${retryError.message}`
+          });
+        }
+
+        console.log(`✅ Email enviado para: ${userData.email}`);
+        return res.json({ 
+          success: true, 
+          message: `Email de reset enviado para ${userData.email}`,
+          email: userData.email
+        });
+      } catch (dbError: any) {
+        console.error('❌ Erro na query:', dbError.message);
+        return res.status(500).json({ 
+          error: `Erro no banco: ${dbError.message}`
+        });
+      }
+    }
+
+    console.log(`✅ Email enviado para: ${cleanEmail}`);
+    return res.json({ 
+      success: true, 
+      message: `Email de reset enviado para ${cleanEmail}`,
+      email: cleanEmail
+    });
+  } catch (error: any) {
+    console.error('❌ Erro geral:', error.message, error.stack);
+    return res.status(500).json({ 
+      error: `Erro: ${error.message}`
+    });
   }
 });
 

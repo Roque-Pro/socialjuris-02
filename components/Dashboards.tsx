@@ -151,6 +151,13 @@ const UserProfile: React.FC = () => {
         bio: currentUser?.bio || '',
     });
     const [loading, setLoading] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(!!currentUser?.mustChangePassword);
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [isMustChange, setIsMustChange] = useState(!!currentUser?.mustChangePassword);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -163,6 +170,71 @@ const UserProfile: React.FC = () => {
             await updateProfile(formData);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleChangePassword = async () => {
+        setPasswordError('');
+
+        if (!newPassword) {
+            setPasswordError('Informe uma nova senha');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setPasswordError('A senha deve ter pelo menos 6 caracteres');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError('As senhas não conferem');
+            return;
+        }
+
+        if (!currentUser?.email) return;
+
+        setPasswordLoading(true);
+        try {
+            const response = await fetch('http://localhost:10000/api/auth/admin-reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    newPassword: newPassword
+                })
+            });
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.error('Erro ao parsear JSON:', e, 'Response status:', response.status, 'Response text:', await response.text());
+                throw new Error('Servidor retornou resposta inválida');
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao alterar senha');
+            }
+
+            alert('✅ Senha alterada com sucesso!');
+            setShowPasswordModal(false);
+            setNewPassword('');
+            setConfirmPassword('');
+            setPasswordError('');
+            setIsMustChange(false);
+            
+            // Atualizar o usuário no banco para marcar que já alterou
+            if (isMustChange) {
+                await updateProfile({ mustChangePassword: false });
+            }
+        } catch (error: any) {
+            const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+            setPasswordError(errorMsg);
+            console.error('Password change error:', error);
+        } finally {
+            setPasswordLoading(false);
         }
     };
 
@@ -227,12 +299,113 @@ const UserProfile: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="pt-4 flex justify-end">
-                        <button type="submit" disabled={loading} className="flex items-center space-x-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div className="pt-4 flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowPasswordModal(true)}
+                            disabled={loading || passwordLoading}
+                            className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {passwordLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Lock className="w-5 h-5" />}
+                            <span>{passwordLoading ? 'Processando...' : 'Alterar Senha'}</span>
+                        </button>
+                        <button type="submit" disabled={loading || passwordLoading} className="flex items-center space-x-2 bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                             <span>{loading ? 'Salvando...' : 'Salvar Alterações'}</span>
                         </button>
                     </div>
+
+                    {/* Modal de Alterar Senha - Direto */}
+                    {showPasswordModal && (
+                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+                                 <div className={`p-6 border-b ${isMustChange ? 'bg-orange-50 border-orange-200' : 'border-slate-200'}`}>
+                                     <div className="flex items-start gap-3">
+                                         {isMustChange && <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />}
+                                         <div>
+                                             <h3 className="text-lg font-bold text-slate-900">Alterar Senha</h3>
+                                             <p className="text-sm text-slate-500 mt-1">{currentUser?.email}</p>
+                                             {isMustChange && <p className="text-sm text-orange-700 mt-2 font-semibold">⚠️ Obrigatório alterar sua senha por segurança</p>}
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <div className="p-6 space-y-4">
+                                     {passwordError && (
+                                         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                             <p className="text-sm text-red-700">{passwordError}</p>
+                                         </div>
+                                     )}
+
+                                     <div className="space-y-2">
+                                         <label className="text-sm font-semibold text-slate-700">Nova Senha</label>
+                                         <input
+                                             type={showNewPassword ? 'text' : 'password'}
+                                             value={newPassword}
+                                             onChange={(e) => setNewPassword(e.target.value)}
+                                             placeholder="Digite a nova senha"
+                                             disabled={passwordLoading}
+                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                                         />
+                                     </div>
+
+                                     <div className="space-y-2">
+                                         <label className="text-sm font-semibold text-slate-700">Confirmar Senha</label>
+                                         <input
+                                             type={showNewPassword ? 'text' : 'password'}
+                                             value={confirmPassword}
+                                             onChange={(e) => setConfirmPassword(e.target.value)}
+                                             placeholder="Repita a nova senha"
+                                             disabled={passwordLoading}
+                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                                         />
+                                     </div>
+
+                                     <label className="flex items-center space-x-2 text-sm text-slate-600">
+                                         <input
+                                             type="checkbox"
+                                             checked={showNewPassword}
+                                             onChange={(e) => setShowNewPassword(e.target.checked)}
+                                             disabled={passwordLoading}
+                                             className="rounded border-slate-300"
+                                         />
+                                         <span>Mostrar Senha</span>
+                                     </label>
+                                 </div>
+
+                                 <div className="p-6 border-t border-slate-200 flex space-x-3">
+                                     <button
+                                         onClick={() => {
+                                             if (!isMustChange) {
+                                                 setShowPasswordModal(false);
+                                                 setNewPassword('');
+                                                 setConfirmPassword('');
+                                                 setPasswordError('');
+                                             }
+                                         }}
+                                         disabled={passwordLoading || isMustChange}
+                                         className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                         title={isMustChange ? 'Obrigatório alterar a senha' : ''}
+                                     >
+                                         {isMustChange ? 'Obrigatório' : 'Cancelar'}
+                                     </button>
+                                     <button
+                                         onClick={handleChangePassword}
+                                         disabled={passwordLoading}
+                                         className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition flex items-center justify-center space-x-2 disabled:opacity-50"
+                                     >
+                                         {passwordLoading ? (
+                                             <>
+                                                 <Loader2 className="w-4 h-4 animate-spin" />
+                                                 <span>Alterando...</span>
+                                             </>
+                                         ) : (
+                                             <span>Alterar Senha</span>
+                                         )}
+                                     </button>
+                                 </div>
+                             </div>
+                         </div>
+                     )}
                 </form>
             </div>
         </div>
@@ -1872,24 +2045,24 @@ const SystemDocumentation: React.FC = () => {
                 {tab === 'overview' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold mb-6 text-slate-900">O que é SocialJurídico? 🏛️</h2>
-                        
+
                         <div className="bg-indigo-50 border-l-4 border-indigo-600 p-6 rounded-lg mb-6">
                             <p className="text-slate-800 leading-relaxed text-base">
-                                <strong>SocialJuridico</strong> é uma plataforma jurídica revolucionária que democratiza o acesso à Justiça, 
-                                conectando clientes a advogados especializados em toda a nação. Desenvolvida com <strong>Inteligência Artificial avançada</strong>, 
-                                oferece ferramentas profissionais que automatizam processos, economizam tempo e potencializam resultados. 
-                                Seja um cliente em busca de representação ou um advogado expandindo seu portfólio, 
+                                <strong>SocialJuridico</strong> é uma plataforma jurídica revolucionária que democratiza o acesso à Justiça,
+                                conectando clientes a advogados especializados em toda a nação. Desenvolvida com <strong>Inteligência Artificial avançada</strong>,
+                                oferece ferramentas profissionais que automatizam processos, economizam tempo e potencializam resultados.
+                                Seja um cliente em busca de representação ou um advogado expandindo seu portfólio,
                                 o SocialJuridico é seu aliado estratégico na carreira jurídica.
                             </p>
                         </div>
 
                         <h3 className="text-2xl font-bold text-slate-900 mt-8 mb-4">Como Funciona</h3>
                         <p className="text-slate-700 mb-6 leading-relaxed">
-                            O SocialJuridico funciona como um intermediário transparente entre clientes que precisam de serviços jurídicos 
-                            e advogados que desejam expandir seus negócios. A plataforma gerencia todo o ciclo de vida de um case, 
+                            O SocialJuridico funciona como um intermediário transparente entre clientes que precisam de serviços jurídicos
+                            e advogados que desejam expandir seus negócios. A plataforma gerencia todo o ciclo de vida de um case,
                             desde a publicação até a conclusão, com segurança, rastreabilidade e profissionalismo.
                         </p>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg hover:shadow-lg transition">
                                 <h4 className="font-bold text-blue-900 mb-4 text-lg">👥 Portal do Cliente</h4>
@@ -1900,7 +2073,7 @@ const SystemDocumentation: React.FC = () => {
                                     <li className="flex items-start gap-2"><span className="text-blue-600 font-bold">✓</span> <span><strong>Histórico Completo:</strong> Acompanhe todos seus casos em um único lugar</span></li>
                                 </ul>
                             </div>
-                            
+
                             <div className="bg-purple-50 border border-purple-200 p-6 rounded-lg hover:shadow-lg transition">
                                 <h4 className="font-bold text-purple-900 mb-4 text-lg">⚖️ Portal do Advogado PRO</h4>
                                 <ul className="text-sm text-purple-800 space-y-2.5 leading-relaxed">
@@ -1927,7 +2100,7 @@ const SystemDocumentation: React.FC = () => {
                         <div className="bg-yellow-50 border border-yellow-300 p-6 rounded-lg mt-6">
                             <h4 className="font-bold text-yellow-900 mb-2">💡 Diferencial SocialJuridico:</h4>
                             <p className="text-sm text-yellow-800">
-                                Diferente de outros marketplaces, o SocialJuridico oferece ferramentas IA integradas que multiplicam 
+                                Diferente de outros marketplaces, o SocialJuridico oferece ferramentas IA integradas que multiplicam
                                 a eficiência dos advogados. Não é apenas um portal de anúncios — é um ecossistema completo de trabalho.
                             </p>
                         </div>
@@ -1937,10 +2110,10 @@ const SystemDocumentation: React.FC = () => {
                 {tab === 'marketplace' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold mb-6 text-slate-900">Como Funciona o Marketplace? 🛍️</h2>
-                        
+
                         <div className="bg-amber-50 border border-amber-300 p-6 rounded-lg mb-6">
                             <p className="text-slate-800 leading-relaxed">
-                                O SocialJuridico funciona como um <strong>marketplace profissional</strong> que segue um fluxo intuitivo e transparente. 
+                                O SocialJuridico funciona como um <strong>marketplace profissional</strong> que segue um fluxo intuitivo e transparente.
                                 Cada interação é registrada, facilitando o rastreamento e garantindo qualidade em toda a jornada.
                             </p>
                         </div>
@@ -1952,8 +2125,8 @@ const SystemDocumentation: React.FC = () => {
                                     <div className="flex-1">
                                         <h4 className="font-bold text-blue-900 text-base mb-2">Cliente Publica um Caso</h4>
                                         <p className="text-sm text-blue-800 leading-relaxed">
-                                            O cliente acessa a plataforma e cria um novo caso, fornecendo informações detalhadas sobre seu problema jurídico. 
-                                            Pode incluir documentos, fotos e contexto completo. A IA automaticamente classifica a categoria (trabalhista, civil, penal, etc.) 
+                                            O cliente acessa a plataforma e cria um novo caso, fornecendo informações detalhadas sobre seu problema jurídico.
+                                            Pode incluir documentos, fotos e contexto completo. A IA automaticamente classifica a categoria (trabalhista, civil, penal, etc.)
                                             e estima a complexidade. O caso é listado no marketplace com visibilidade total para advogados qualificados.
                                         </p>
                                     </div>
@@ -1966,8 +2139,8 @@ const SystemDocumentation: React.FC = () => {
                                     <div className="flex-1">
                                         <h4 className="font-bold text-purple-900 text-base mb-2">Advogados Visualizam Casos Disponíveis</h4>
                                         <p className="text-sm text-purple-800 leading-relaxed">
-                                            Advogados assinantes (plano PRO) acessam uma dashboard com todos os casos abertos na plataforma. 
-                                            Podem filtrar por área de expertise, localização, urgência e valor estimado. 
+                                            Advogados assinantes (plano PRO) acessam uma dashboard com todos os casos abertos na plataforma.
+                                            Podem filtrar por área de expertise, localização, urgência e valor estimado.
                                             Cada caso mostra um resumo detalhado, histórico do cliente, análise de viabilidade gerada pela IA.
                                         </p>
                                     </div>
@@ -1980,8 +2153,8 @@ const SystemDocumentation: React.FC = () => {
                                     <div className="flex-1">
                                         <h4 className="font-bold text-green-900 text-base mb-2">Advogado Manifesta Interesse</h4>
                                         <p className="text-sm text-green-800 leading-relaxed">
-                                            Quando encontra um caso de seu interesse, o advogado clica em "Manifestar Interesse". 
-                                            Neste momento, pode enviar uma proposta com sua abordagem estratégica, estimativa de honorários 
+                                            Quando encontra um caso de seu interesse, o advogado clica em "Manifestar Interesse".
+                                            Neste momento, pode enviar uma proposta com sua abordagem estratégica, estimativa de honorários
                                             e cronograma esperado. A plataforma notifica o cliente sobre o novo interessado automaticamente.
                                         </p>
                                     </div>
@@ -1994,8 +2167,8 @@ const SystemDocumentation: React.FC = () => {
                                     <div className="flex-1">
                                         <h4 className="font-bold text-red-900 text-base mb-2">Cliente Escolhe o Advogado</h4>
                                         <p className="text-sm text-red-800 leading-relaxed">
-                                            O cliente avalia os advogados interessados, verifica suas avaliações, especialidade e propostas. 
-                                            Pode conversar com múltiplos candidatos através de chat e então seleciona aquele que melhor se adequa ao seu caso. 
+                                            O cliente avalia os advogados interessados, verifica suas avaliações, especialidade e propostas.
+                                            Pode conversar com múltiplos candidatos através de chat e então seleciona aquele que melhor se adequa ao seu caso.
                                             Neste momento, o caso é removido do marketplace para evitar duplicidades.
                                         </p>
                                     </div>
@@ -2008,8 +2181,8 @@ const SystemDocumentation: React.FC = () => {
                                     <div className="flex-1">
                                         <h4 className="font-bold text-indigo-900 text-base mb-2">Chat Ativo e Desenvolvimento do Caso</h4>
                                         <p className="text-sm text-indigo-800 leading-relaxed">
-                                            Advogado e cliente iniciam comunicação permanente via chat integrado. O advogado pode usar 
-                                            todas as ferramentas PRO para análise jurídica, pesquisa jurisprudencial, redação de peças profissionais, 
+                                            Advogado e cliente iniciam comunicação permanente via chat integrado. O advogado pode usar
+                                            todas as ferramentas PRO para análise jurídica, pesquisa jurisprudencial, redação de peças profissionais,
                                             e compartilhar documentos com o cliente diretamente na plataforma de forma segura.
                                         </p>
                                     </div>
@@ -2022,8 +2195,8 @@ const SystemDocumentation: React.FC = () => {
                                     <div className="flex-1">
                                         <h4 className="font-bold text-emerald-900 text-base mb-2">Caso Finalizado com Avaliação</h4>
                                         <p className="text-sm text-emerald-800 leading-relaxed">
-                                            Quando o caso é concluído (sentença proferida, acordo celebrado, etc.), o cliente avalia o trabalho do advogado 
-                                            em uma escala de 5 estrelas com comentário detalhado. Esta avaliação fica registrada no perfil público do profissional, 
+                                            Quando o caso é concluído (sentença proferida, acordo celebrado, etc.), o cliente avalia o trabalho do advogado
+                                            em uma escala de 5 estrelas com comentário detalhado. Esta avaliação fica registrada no perfil público do profissional,
                                             construindo reputação e confiança na plataforma.
                                         </p>
                                     </div>
@@ -2046,9 +2219,9 @@ const SystemDocumentation: React.FC = () => {
                 {tab === 'tools' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold mb-6 text-slate-900">Ferramentas PRO - Seu Assistente Jurídico 24/7 🚀</h2>
-                        
+
                         <p className="text-slate-700 text-base leading-relaxed bg-slate-50 p-4 rounded-lg">
-                            Cada ferramenta foi desenvolvida com especialistas jurídicos e alimentada com jurisprudência brasileira atualizada. 
+                            Cada ferramenta foi desenvolvida com especialistas jurídicos e alimentada com jurisprudência brasileira atualizada.
                             Funcionam integradas entre si, criando um fluxo de trabalho eficiente. Acesso ilimitado para planos PRO.
                         </p>
 
@@ -2056,7 +2229,7 @@ const SystemDocumentation: React.FC = () => {
                             <div className="bg-blue-50 border-2 border-blue-300 p-6 rounded-lg hover:shadow-lg transition">
                                 <p className="font-bold text-lg mb-3 text-blue-900">📄 Redator IA Jurídico</p>
                                 <p className="text-sm text-slate-700 mb-4 leading-relaxed">
-                                    Gera peças jurídicas profissionais com múltiplos tons: formal, técnico ou persuasivo. 
+                                    Gera peças jurídicas profissionais com múltiplos tons: formal, técnico ou persuasivo.
                                     Inclui fundamentação legal, jurisprudência e argumentações estruturadas. Suporta todas as áreas.
                                 </p>
                                 <div className="text-xs text-slate-600 space-y-1.5 bg-white p-3 rounded">
@@ -2072,7 +2245,7 @@ const SystemDocumentation: React.FC = () => {
                             <div className="bg-green-50 border-2 border-green-300 p-6 rounded-lg hover:shadow-lg transition">
                                 <p className="font-bold text-lg mb-3 text-green-900">📊 Agenda Inteligente</p>
                                 <p className="text-sm text-slate-700 mb-4 leading-relaxed">
-                                    Otimiza prazos judiciários com sugestões inteligentes baseadas no tipo de processo. 
+                                    Otimiza prazos judiciários com sugestões inteligentes baseadas no tipo de processo.
                                     Inclui detecção de conflitos, alertas automáticos e relatórios estratégicos de análise.
                                 </p>
                                 <div className="text-xs text-slate-600 space-y-1.5 bg-white p-3 rounded">
@@ -2088,7 +2261,7 @@ const SystemDocumentation: React.FC = () => {
                             <div className="bg-purple-50 border-2 border-purple-300 p-6 rounded-lg hover:shadow-lg transition">
                                 <p className="font-bold text-lg mb-3 text-purple-900">👥 CRM com IA</p>
                                 <p className="text-sm text-slate-700 mb-4 leading-relaxed">
-                                    Gerencia toda sua cartela de clientes com análise de risco automática, geração de perfil inteligente, 
+                                    Gerencia toda sua cartela de clientes com análise de risco automática, geração de perfil inteligente,
                                     chat com IA e relatórios detalhados de comportamento e potencial.
                                 </p>
                                 <div className="text-xs text-slate-600 space-y-1.5 bg-white p-3 rounded">
@@ -2104,7 +2277,7 @@ const SystemDocumentation: React.FC = () => {
                             <div className="bg-yellow-50 border-2 border-yellow-300 p-6 rounded-lg hover:shadow-lg transition">
                                 <p className="font-bold text-lg mb-3 text-yellow-900">💰 Calculadora Jurídica</p>
                                 <p className="text-sm text-slate-700 mb-4 leading-relaxed">
-                                    Calcula automaticamente rescisão, férias, horas extras, correção monetária, juros, 
+                                    Calcula automaticamente rescisão, férias, horas extras, correção monetária, juros,
                                     aposentadoria e honorários com precisão fiscal e índices atualizados.
                                 </p>
                                 <div className="text-xs text-slate-600 space-y-1.5 bg-white p-3 rounded">
@@ -2120,7 +2293,7 @@ const SystemDocumentation: React.FC = () => {
                             <div className="bg-red-50 border-2 border-red-300 p-6 rounded-lg hover:shadow-lg transition">
                                 <p className="font-bold text-lg mb-3 text-red-900">📚 Jurisprudência Inteligente</p>
                                 <p className="text-sm text-slate-700 mb-4 leading-relaxed">
-                                    Busca decisões STJ e STF com análise contextualizada. Encontra jurisprudência pacífica 
+                                    Busca decisões STJ e STF com análise contextualizada. Encontra jurisprudência pacífica
                                     relevante para sua estratégia processual com fundamentação completa.
                                 </p>
                                 <div className="text-xs text-slate-600 space-y-1.5 bg-white p-3 rounded">
@@ -2136,7 +2309,7 @@ const SystemDocumentation: React.FC = () => {
                             <div className="bg-teal-50 border-2 border-teal-300 p-6 rounded-lg hover:shadow-lg transition">
                                 <p className="font-bold text-lg mb-3 text-teal-900">🔍 Triagem Automática</p>
                                 <p className="text-sm text-slate-700 mb-4 leading-relaxed">
-                                    Analisa descrição do cliente e gera diagnóstico completo: viabilidade jurídica, 
+                                    Analisa descrição do cliente e gera diagnóstico completo: viabilidade jurídica,
                                     riscos, pontos fortes e recomendações estratégicas em segundos.
                                 </p>
                                 <div className="text-xs text-slate-600 space-y-1.5 bg-white p-3 rounded">
@@ -2169,7 +2342,7 @@ const SystemDocumentation: React.FC = () => {
                 {tab === 'updates' && (
                     <div className="space-y-5">
                         <h2 className="text-3xl font-bold mb-6 text-slate-900">✅ Atualizações & Roadmap (Fev/2026)</h2>
-                        
+
                         <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-lg mb-6">
                             <p className="text-slate-800 font-bold mb-2">🎉 Versão 4.1 — Maior atualização do ano!</p>
                             <p className="text-sm text-slate-700">Concentramos esforços em 8 áreas críticas de melhoria. Veja abaixo as novidades que vão transformar sua prática.</p>
@@ -2232,7 +2405,7 @@ const SystemDocumentation: React.FC = () => {
                 {tab === 'tutoriais' && (
                     <div className="space-y-6">
                         <h2 className="text-3xl font-bold mb-6 text-slate-900">Tutoriais & Guia de Uso 🎓</h2>
-                        
+
                         <div className="bg-blue-50 border border-blue-300 p-6 rounded-lg">
                             <h4 className="font-bold text-blue-900 mb-4 text-lg">📖 Para Clientes</h4>
                             <div className="space-y-3">
@@ -4890,6 +5063,11 @@ export const AdminDashboard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const filteredLawyers = lawyers.filter(l => l.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
+    // Estado para resetar senha
+    const [selectedUserForPassword, setSelectedUserForPassword] = useState<User | null>(null);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordLoading, setPasswordLoading] = useState(false);
+
     // Estado para upload de banners
     const [banner1Image, setBanner1Image] = useState<string>('');
     const [banner1Link, setBanner1Link] = useState<string>('');
@@ -4897,6 +5075,73 @@ export const AdminDashboard: React.FC = () => {
     const [banner2Link, setBanner2Link] = useState<string>('');
     const [savingBanner1, setSavingBanner1] = useState(false);
     const [savingBanner2, setSavingBanner2] = useState(false);
+
+    // Estados para modal de mudança de senha
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+
+    // Handler para alterar senha direto
+    const handleChangePassword = async () => {
+        setPasswordError('');
+
+        if (!newPassword) {
+            setPasswordError('Informe uma nova senha');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            setPasswordError('A senha deve ter pelo menos 6 caracteres');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError('As senhas não conferem');
+            return;
+        }
+
+        if (!selectedUserForPassword?.email) return;
+
+        setPasswordLoading(true);
+        try {
+            const response = await fetch('http://localhost:10000/api/auth/admin-reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: selectedUserForPassword.id,
+                    newPassword: newPassword
+                })
+            });
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.error('Erro ao parsear JSON:', e, 'Response status:', response.status);
+                throw new Error('Servidor retornou resposta inválida');
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao alterar senha');
+            }
+
+            alert(`✅ Senha alterada com sucesso para ${selectedUserForPassword.name}!`);
+            setShowPasswordModal(false);
+            setSelectedUserForPassword(null);
+            setNewPassword('');
+            setConfirmPassword('');
+            setPasswordError('');
+        } catch (error: any) {
+            const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+            setPasswordError(errorMsg);
+            console.error('Password change error:', error);
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
 
     // Carregar dados dos banners ao montar
     useEffect(() => {
@@ -5262,24 +5507,122 @@ export const AdminDashboard: React.FC = () => {
                                     </button>
                                 </td>
                                 <td className="p-4 text-center">
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm(`Tem certeza que deseja deletar ${lawyer.name}? Esta ação é irreversível.`)) {
-                                                deleteUser(lawyer.id);
-                                            }
-                                        }}
-                                        className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center"
-                                        title="Deletar usuário"
-                                    >
-                                        <XCircle className="w-4 h-4 mr-1" />
-                                        Deletar
-                                    </button>
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedUserForPassword(lawyer);
+                                                setShowPasswordModal(true);
+                                            }}
+                                            className="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center"
+                                            title="Resetar senha do usuário"
+                                        >
+                                            <Lock className="w-4 h-4 mr-1" />
+                                            Senha
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm(`Tem certeza que deseja deletar ${lawyer.name}? Esta ação é irreversível.`)) {
+                                                    deleteUser(lawyer.id);
+                                                }
+                                            }}
+                                            className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center"
+                                            title="Deletar usuário"
+                                        >
+                                            <XCircle className="w-4 h-4 mr-1" />
+                                            Deletar
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+            {/* Modal de Alterar Senha - Direto */}
+            {showPasswordModal && selectedUserForPassword && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+                        <div className="p-6 border-b border-slate-200">
+                            <h3 className="text-lg font-bold text-slate-900">Alterar Senha</h3>
+                            <p className="text-sm text-slate-500 mt-1">{selectedUserForPassword.name}</p>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            {passwordError && (
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <p className="text-sm text-red-700">{passwordError}</p>
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700">Nova Senha</label>
+                                <input
+                                    type={showNewPassword ? 'text' : 'password'}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Digite a nova senha"
+                                    disabled={passwordLoading}
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700">Confirmar Senha</label>
+                                <input
+                                    type={showNewPassword ? 'text' : 'password'}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Repita a nova senha"
+                                    disabled={passwordLoading}
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                                />
+                            </div>
+
+                            <label className="flex items-center space-x-2 text-sm text-slate-600">
+                                <input
+                                    type="checkbox"
+                                    checked={showNewPassword}
+                                    onChange={(e) => setShowNewPassword(e.target.checked)}
+                                    disabled={passwordLoading}
+                                    className="rounded border-slate-300"
+                                />
+                                <span>Mostrar Senha</span>
+                            </label>
+                        </div>
+
+                        <div className="p-6 border-t border-slate-200 flex space-x-3">
+                            <button
+                                onClick={() => {
+                                    setShowPasswordModal(false);
+                                    setSelectedUserForPassword(null);
+                                    setNewPassword('');
+                                    setConfirmPassword('');
+                                    setPasswordError('');
+                                }}
+                                disabled={passwordLoading}
+                                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold rounded-lg transition disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleChangePassword}
+                                disabled={passwordLoading}
+                                className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition flex items-center justify-center space-x-2 disabled:opacity-50"
+                            >
+                                {passwordLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span>Alterando...</span>
+                                    </>
+                                ) : (
+                                    <span>Alterar Senha</span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

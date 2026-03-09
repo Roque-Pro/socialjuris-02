@@ -614,35 +614,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
    const resetPassword = async (email: string, newPassword?: string) => {
      try {
-       if (!newPassword) {
-         // Etapa 1: Enviar email de recuperação com link de reset
-         const redirectUrl = `${window.location.origin}/reset-password-confirm`;
-         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-           redirectTo: redirectUrl
-         });
-         if (error) throw new Error(error.message || "Erro ao enviar e-mail de recuperação");
-       } else {
-         // Etapa 2: Buscar o usuário pelo email e atualizar a senha
-         // Primeiro, fazer login temporário para poder atualizar a senha
-         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-           email: email,
-           password: '123456' // Senha padrão
-         });
-         
-         if (signInError) {
-           // Se não conseguir fazer login com senha padrão, permitir atualizar mesmo assim
-           // O Supabase permite update sem estar logado se usar o token correto
-         }
-         
-         // Atualizar a senha do usuário autenticado
-         const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-         if (updateError) throw new Error(updateError.message || "Erro ao atualizar senha");
-         
-         // Fazer logout após atualizar a senha
-         await supabase.auth.signOut();
+       // Validar email básico
+       if (!email || !email.includes('@')) {
+         throw new Error("Email inválido. Por favor, verifique o endereço de email do usuário.");
        }
+
+       console.log(`🔐 Iniciando reset de senha para: ${email}`);
+
+       // Usar o novo endpoint robusto no servidor
+       const response = await fetch('/api/auth/reset-password', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ email: email.trim() })
+       });
+
+       const data = await response.json();
+
+       if (!response.ok) {
+         throw new Error(data.error || "Erro ao resetar senha");
+       }
+
+       console.log("✅ Reset de senha iniciado com sucesso:", data);
+       
+       // Feedback ao usuário
+       alert(`Email de reset de senha foi enviado para ${data.email}. Verifique sua caixa de entrada.`);
      } catch (error) {
        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+       console.error("Reset password exception:", errorMessage);
        throw new Error(errorMessage);
      }
    };

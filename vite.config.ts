@@ -8,7 +8,14 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
-        allowedHosts: ['socialjuris-02.onrender.com', 'localhost', '127.0.0.1']
+        allowedHosts: ['socialjuris-02.onrender.com', 'localhost', '127.0.0.1'],
+        proxy: {
+          '/api': {
+            target: 'http://localhost:10000',
+            changeOrigin: true,
+            rewrite: (path) => path,
+          },
+        }
       },
       plugins: [react()],
       define: {
