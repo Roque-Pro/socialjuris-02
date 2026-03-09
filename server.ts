@@ -112,8 +112,6 @@ app.post('/api/auth/admin-reset-password', async (req, res) => {
   }
 });
 
-app.use(express.static('dist'));
-
 // --- 2. INICIALIZAÇÃO DE SERVIÇOS (STRIPE/SUPABASE/OPENAI) ---
 const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY || '');
 const getSupabase = () => createClient(
@@ -1365,6 +1363,9 @@ app.post('/api/auth/reset-password', async (req, res) => {
     });
   }
 });
+
+// ⚠️ Servir arquivos estáticos DEPOIS de todas as rotas de API
+app.use(express.static('dist'));
 
 // Catch-all para React Router
 app.use((req, res) => {
