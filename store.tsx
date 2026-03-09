@@ -621,14 +621,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
        console.log(`🔐 Iniciando reset de senha para: ${email}`);
 
-       // Usar o novo endpoint robusto no servidor
-       const response = await fetch('/api/auth/reset-password', {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({ email: email.trim() })
-       });
+        // Usar o novo endpoint robusto no servidor
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+        const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: email.trim() })
+        });
 
        const data = await response.json();
 
